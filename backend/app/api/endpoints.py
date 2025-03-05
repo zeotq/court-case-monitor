@@ -1,8 +1,9 @@
-from fastapi import APIRouter, HTTPException
-from fastapi.responses import HTMLResponse, RedirectResponse
-import requests
+from fastapi import APIRouter, HTTPException, Body
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
+import httpx
 
-from models.models import SearchRequest
+from models.models import SearchRequestData
+from services.kad_parser import SearchResponseParser
 from config import settings
 
 router = APIRouter()
@@ -11,37 +12,35 @@ router = APIRouter()
 async def root():
     return RedirectResponse(url="/pages/")
 
-@router.post("/search", response_class=HTMLResponse)
-async def search_case(request: SearchRequest):
-    case_number = request.CaseNumbers[0] if request.CaseNumbers else "СИП-198/2025"
-    
+@router.post("/search", response_class=JSONResponse)
+async def search_case(request: SearchRequestData = Body(...)):
     url = "https://kad.arbitr.ru/Kad/SearchInstances"
+
     data = {
-        "Page": 1,
-        "Count": 25,
-        "Courts": [],
-        "DateFrom": None,
-        "DateTo": None,
-        "Sides": [],
-        "Judges": [],
-        "CaseNumbers": [case_number],
-        "WithVKSInstances": False
+        "Page": 1 if request.Page is None else request.Page,
+        "Count": min(request.Count, 25) if request.Count else 25,
+        "Courts": request.Courts or [],
+        "DateFrom": request.DateFrom.isoformat() if request.DateFrom else None,
+        "DateTo": request.DateTo.isoformat() if request.DateTo else None,
+        "Sides": [side.dict() for side in (request.Sides or [])],
+        "Judges": [judge.dict() for judge in (request.Judges or [])],
+        "CaseNumbers": request.CaseNumbers or [],
+        "WithVKSInstances": request.WithVKSInstances or False
     }
-    
+
     try:
-        response = requests.post(url, headers=settings.headers, cookies=settings.cookies, json=data)
-        response.raise_for_status()
-    except requests.RequestException as e:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(url, headers=settings.headers, cookies=settings.cookies, json=data)
+            response.raise_for_status()
+    except httpx.HTTPStatusError as e:
+        raise HTTPException(status_code=response.status_code, detail=f"Ошибка запроса: {e}")
+    except httpx.RequestError as e:
         raise HTTPException(status_code=500, detail=f"Ошибка запроса: {e}")
 
-    return HTMLResponse(content=response.text, status_code=response.status_code)
+    parsed_repsonse_text = SearchResponseParser.parse(response.text)
 
-@router.post("/main", response_class=HTMLResponse)
+    return JSONResponse(content=parsed_repsonse_text, status_code=response.status_code)
+
+@router.post("/ping", response_class=HTMLResponse)
 async def main_case():
-    url = "https://kad.arbitr.ru"
-    try:
-        response = requests.get(url, headers=settings.headers)
-        response.raise_for_status()
-    except requests.RequestException as e:
-        raise HTTPException(status_code=500, detail=f"Ошибка запроса: {e}")
-    return HTMLResponse(content=response.text, status_code=response.status_code)
+    return HTMLResponse(content="pong", status_code=200)
