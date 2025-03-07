@@ -1,18 +1,12 @@
-from fastapi import APIRouter, HTTPException, Body
+from fastapi import HTTPException, Body
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 import httpx
 
-from models.models import SearchRequestData
-from services.kad_parser import SearchResponseParser
-from config import settings
+from app.models.kad_models import SearchRequestData
+from app.services.kad_parser import SearchResponseParser
+from app.config import settings
 
-router = APIRouter()
 
-@router.get("/", response_class=RedirectResponse)
-async def root():
-    return RedirectResponse(url="/pages/")
-
-@router.post("/search", response_class=JSONResponse)
 async def search_case(request: SearchRequestData = Body(...)):
     url = "https://kad.arbitr.ru/Kad/SearchInstances"
 
@@ -40,7 +34,3 @@ async def search_case(request: SearchRequestData = Body(...)):
     parsed_repsonse_text = SearchResponseParser.parse(response.text)
 
     return JSONResponse(content=parsed_repsonse_text, status_code=response.status_code)
-
-@router.post("/ping", response_class=HTMLResponse)
-async def main_case():
-    return HTMLResponse(content="pong", status_code=200)

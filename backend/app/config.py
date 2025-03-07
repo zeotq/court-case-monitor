@@ -1,6 +1,7 @@
 from configparser import RawConfigParser
 from pathlib import Path
 
+
 class Settings:
     config = RawConfigParser()
     private_dir = (Path(__file__).parent.parent / "../configs").resolve()
