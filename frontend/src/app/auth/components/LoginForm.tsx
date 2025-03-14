@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 interface LoginFormProps {
   toggle: () => void;
 }
@@ -15,7 +17,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ toggle }) => {
     e.preventDefault();
     setError("");
 
-    const response = await fetch("http://localhost:8080/login", {
+    const response = await fetch(`${API_URL}/auth/login`, {
       method: "POST",
       mode: "cors",
       headers: { "Content-Type": "application/json" },

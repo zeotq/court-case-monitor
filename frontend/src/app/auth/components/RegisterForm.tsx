@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 interface RegisterFormProps {
   toggle: () => void;
 }
@@ -16,7 +18,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ toggle }) => {
     e.preventDefault();
     setError("");
 
-    const response = await fetch("http://localhost:8080/usercreate", {
+    const response = await fetch(`${API_URL}/auth/usercreate`, {
       method: "POST",
       mode: "cors",
       headers: { "Content-Type": "application/json" },
