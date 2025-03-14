@@ -2,7 +2,7 @@ from fastapi import HTTPException, Body
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 import httpx
 
-from app.models.kad_models import SearchRequestData
+from app.models import SearchRequestData
 from app.services.kad_parser import SearchResponseParser
 from app.config import settings
 

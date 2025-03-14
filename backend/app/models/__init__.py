@@ -1,3 +1,4 @@
-from .kad_models import Side, Judge, SearchRequestData
+from .arbitr import *
+from .user import *
 
-__all__ = ['Side', 'Judge', 'SearchRequestData']
+__all__ = ['LoginRequest', 'RegisterRequest', 'Side', 'Judge', 'SearchRequestData']

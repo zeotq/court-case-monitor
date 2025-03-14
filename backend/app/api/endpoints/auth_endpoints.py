@@ -1,8 +1,13 @@
-async def login(username: str, password: str):
-    return {"message": "User logged in"}
+from fastapi import status
+from fastapi.responses import JSONResponse
+from app.models.user import LoginRequest, RegisterRequest
+
+
+async def login(request: LoginRequest):
+    return JSONResponse(content={"message": "User logged in"}, status_code=status.HTTP_200_OK)
 
 async def logout():
-    return {"message": "User logged out"}
+    return JSONResponse(content={"message": "User logged out"}, status_code=status.HTTP_200_OK)
 
-async def user_create(username: str, email: str, password: str):
-    return {"message": "User created"}
+async def usercreate(request: RegisterRequest):
+    return JSONResponse(content={"message": "User created"}, status_code= status.HTTP_201_CREATED)

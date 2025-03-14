@@ -1,18 +1,23 @@
 from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
-from pathlib import Path
-
+from fastapi.middleware.cors import CORSMiddleware
 from app.api.routers import auth_router, external_router
 
 
 app = FastAPI()
 
-public_dir = (Path(__file__).resolve().parent.parent.parent / "frontend").resolve()
+# Разрешённые источники (origins)
+origins = [
+    "http://localhost:3000",
+    "http://localhost:3001"
+]
 
-if not public_dir.exists():
-    raise RuntimeError(f"Static dir {public_dir} not found!")
-
-app.mount("/p", StaticFiles(directory=public_dir, html=True), name="static")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  # Разрешённые домены
+    allow_credentials=True,  # Разрешение кук и авторизации
+    allow_methods=["POST"],  # Разрешённые методы (безопасно ограничить)
+    allow_headers=["Content-Type", "Authorization"],  # Разрешённые заголовки
+)
 
 app.include_router(auth_router)
 app.include_router(external_router)
