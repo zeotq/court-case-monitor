@@ -8,8 +8,8 @@ const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-gray-900 text-white">
-      <div className="p-6 bg-gray-800 rounded-lg shadow-lg w-96">
+    <div className="flex flex-col items-center justify-center h-screen">
+      <div className="p-6 bg-secondary rounded-lg shadow-lg w-96">
         {isLogin ? (
           <LoginForm toggle={() => setIsLogin(false)} />
         ) : (

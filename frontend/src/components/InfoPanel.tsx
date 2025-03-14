@@ -3,15 +3,15 @@
 import { redirect } from "next/navigation";
 import Button from "@/components/Button";
 
-const ButtonsPanel = () => {
+const InfoPanel = () => {
   return (
-    <div className="relative flex items-center justify-center w-full h-80">
+    <div className="relative flex items-center justify-center">
       <div className="relative z-10 flex flex-col gap-4">
-        Welcome to Court Case Monitor
+      Welcome to Court Case Monitor
         <Button onClick={() => redirect(`/auth`)}>Authorization</Button>
       </div>
     </div>
   );
 }
 
-export default ButtonsPanel;
+export default InfoPanel;

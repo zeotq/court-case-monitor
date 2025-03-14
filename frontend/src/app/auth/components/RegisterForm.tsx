@@ -41,7 +41,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ toggle }) => {
         placeholder="Логин"
         value={username}
         onChange={(e) => setUsername(e.target.value)}
-        className="p-2 bg-gray-700 border border-gray-600 rounded"
+        className="p-2 bg-midground border border-gray-600 rounded"
         required
       />
 
@@ -50,7 +50,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ toggle }) => {
         placeholder="Email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        className="p-2 bg-gray-700 border border-gray-600 rounded"
+        className="p-2 bg-midground border border-gray-600 rounded"
         required
       />
 
@@ -59,11 +59,11 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ toggle }) => {
         placeholder="Пароль"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
-        className="p-2 bg-gray-700 border border-gray-600 rounded"
+        className="p-2 bg-midground border border-gray-600 rounded"
         required
       />
 
-      <button type="submit" className="p-2 bg-green-600 hover:bg-green-700 rounded">
+      <button type="submit" className="p-2 bg-green-600 hover:bg-green-700 rounded text-white">
         Зарегистрироваться
       </button>
 

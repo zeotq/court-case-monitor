@@ -40,7 +40,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ toggle }) => {
         placeholder="Логин"
         value={username}
         onChange={(e) => setUsername(e.target.value)}
-        className="p-2 bg-gray-700 border border-gray-600 rounded"
+        className="p-2 bg-midground border border-gray-600 rounded"
         required
       />
 
@@ -49,11 +49,11 @@ const LoginForm: React.FC<LoginFormProps> = ({ toggle }) => {
         placeholder="Пароль"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
-        className="p-2 bg-gray-700 border border-gray-600 rounded"
+        className="p-2 bg-midground border border-gray-600 rounded"
         required
       />
 
-      <button type="submit" className="p-2 bg-blue-600 hover:bg-blue-700 rounded">
+      <button type="submit" className="p-2 bg-blue-600 hover:bg-blue-700 rounded text-white">
         Войти
       </button>
 
