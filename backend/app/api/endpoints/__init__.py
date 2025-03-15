@@ -1,4 +1,4 @@
-from .auth_endpoints import login, logout, user_create
+from .auth_endpoints import login, logout, usercreate
 from .external_endpoints import search_case
 
-__all__ = ["search_case", "login", "logout", "user_create"]
+__all__ = ["search_case", "login", "logout", "usercreate"]

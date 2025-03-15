@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Body
 from fastapi.responses import JSONResponse
 
-from app.models.kad_models import SearchRequestData
+from app.models import SearchRequestData
 from app.api.endpoints import external_endpoints
 
 
