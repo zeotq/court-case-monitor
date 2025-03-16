@@ -1,4 +1,5 @@
-from .arbitr import *
-from .user import *
+from .arbitr import SearchRequestData, Side, Judge
+from .user import User, UserDB, UserInDB
+from .token import Token, TokenData, TokenPayload
 
-__all__ = ['LoginRequest', 'RegisterRequest', 'Side', 'Judge', 'SearchRequestData']
+__all__ = ['User', 'UserDB', 'UserInDB', 'Side', 'Judge', 'SearchRequestData', 'Token', 'TokenData', 'TokenPayload']
