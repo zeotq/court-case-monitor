@@ -1,13 +1,15 @@
-from fastapi import HTTPException, Body
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
+from fastapi import HTTPException, Body, Depends
+from fastapi.responses import JSONResponse
 import httpx
 
 from app.models import SearchRequestData
 from app.services.kad_parser import SearchResponseParser
-from app.config import settings
+from app.utils.config import settings
 
 
-async def search_case(request: SearchRequestData = Body(...)):
+async def search_case(
+        request: SearchRequestData = Body(...),
+    ):
     url = "https://kad.arbitr.ru/Kad/SearchInstances"
 
     data = {

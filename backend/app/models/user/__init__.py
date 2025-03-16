@@ -1,3 +1,4 @@
-from .auth import LoginRequest, RegisterRequest
+from .auth import User, UserInDB
+from .db import UserDB
 
-__all__ = ['LoginRequest', 'RegisterRequest']
+__all__ = ['User', 'UserInDB', 'UserDB']
