@@ -4,18 +4,23 @@ from app.utils.config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES,
 from app.models.token import TokenPayload
 
 
-async def create_access_token(data: dict, expires_delta: timedelta | None = None):
-    return await _create_token(data, expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
+def get_expiration_time(expires_delta: timedelta) -> datetime:
+    now = datetime.now(timezone.utc)
+    expiration = now + expires_delta
+    return expiration
 
 
-async def create_refresh_token(data: dict, expires_delta: timedelta | None = None):
-    return await _create_token(data, expires_delta or timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS))
+async def create_access_token(data: dict, expiry_date: datetime | None = None):
+    return await _create_token(data, expiry_date or get_expiration_time(timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)))
 
 
-async def _create_token(data: dict, expires_delta: timedelta) -> str:
+async def create_refresh_token(data: dict, expiry_date: datetime | None = None):
+    return await _create_token(data, expiry_date or get_expiration_time(timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)))
+
+
+async def _create_token(data: dict, expiry_date: datetime) -> str:
     to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + expires_delta
-    to_encode.update({"exp": expire})
+    to_encode.update({"exp": expiry_date})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 

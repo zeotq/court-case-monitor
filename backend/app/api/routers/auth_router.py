@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Response, Depends
+from fastapi import APIRouter, Depends, Request
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.responses import JSONResponse
 from typing import Annotated
 
 from app.api.endpoints import auth_endpoints
@@ -10,11 +11,15 @@ from app.models.token import Token
 auth_router = APIRouter(prefix="/auth", tags=["auth"])
 
 @auth_router.post("/login")
-async def login(response: Response, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]) -> Token:
+async def login(response: JSONResponse, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]) -> Token:
     return await auth_endpoints.login(response, form_data)
 
+@auth_router.post("/refresh")
+async def refresh_token(request: Request, response: JSONResponse):
+    return await auth_endpoints.refresh_token(request, response)
+
 @auth_router.post("/logout")
-async def logout(response: Response):
+async def logout(response: JSONResponse):
     return await auth_endpoints.logout(response)
 
 @auth_router.post("/registration")

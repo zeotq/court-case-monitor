@@ -6,7 +6,7 @@ from app.services.database import fake_db
 
 
 async def get_current_user(request: Request, token: Optional[str] = None) -> UserInDB:
-    token = request.cookies.get("access_token")
+    token = token or request.cookies.get("access_token")
     if not token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -15,14 +15,14 @@ async def get_current_user(request: Request, token: Optional[str] = None) -> Use
         )
 
     payload = await decode_token(token)
-    if not payload or "sub" not in payload:
+    if not payload:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"}
         )
 
-    username = payload["sub"]
+    username = payload.sub
     user = fake_db.get_user(username)
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
