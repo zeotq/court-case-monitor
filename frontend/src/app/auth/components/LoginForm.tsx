@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 interface LoginFormProps {
   toggle: () => void;
 }
@@ -15,11 +17,16 @@ const LoginForm: React.FC<LoginFormProps> = ({ toggle }) => {
     e.preventDefault();
     setError("");
 
-    const response = await fetch("http://localhost:8080/login", {
+    const params = new URLSearchParams();
+    params.append('username', username);
+    params.append('password', password);
+
+    const response = await fetch(`${API_URL}/auth/login`, {
       method: "POST",
       mode: "cors",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: params.toString(),
+      credentials: "include",
     });
 
     const data = await response.json();
