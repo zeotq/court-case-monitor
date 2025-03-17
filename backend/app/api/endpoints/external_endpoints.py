@@ -1,4 +1,4 @@
-from fastapi import HTTPException, Body, Depends
+from fastapi import HTTPException, Body, status
 from fastapi.responses import JSONResponse
 import httpx
 
@@ -31,7 +31,7 @@ async def search_case(
     except httpx.HTTPStatusError as e:
         raise HTTPException(status_code=response.status_code, detail=f"Ошибка запроса: {e}")
     except httpx.RequestError as e:
-        raise HTTPException(status_code=500, detail=f"Ошибка запроса: {e}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Ошибка запроса: {e}")
 
     parsed_repsonse_text = SearchResponseParser.parse(response.text)
 
