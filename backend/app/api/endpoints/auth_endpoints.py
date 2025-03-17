@@ -8,7 +8,7 @@ from json import dumps
 from app.models.user import User
 from app.services.database import fake_db
 from app.utils.jwt import create_access_token, create_refresh_token, get_expiration_time
-from app.utils.deps import get_current_user
+from app.services.jwt_validation import refresh_cookie_validation
 from app.utils.config import ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_DAYS
 
 
@@ -57,9 +57,7 @@ async def login(response: JSONResponse, form_data: Annotated[OAuth2PasswordReque
 
 
 async def refresh_token(request: Request, response: JSONResponse):
-    refresh_token = request.cookies.get("refresh_token")
-    
-    user = await get_current_user(request, refresh_token)
+    user = await refresh_cookie_validation(request)
 
     new_access_token_expires = get_expiration_time(timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
     new_access_token = await create_access_token({'sub': user.username}, expiry_date=new_access_token_expires)
