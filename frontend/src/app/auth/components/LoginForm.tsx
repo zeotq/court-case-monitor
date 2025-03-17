@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/app/auth/components/AuthContext";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -12,6 +14,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ toggle }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const { setAccessToken } = useAuth();
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,7 +37,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ toggle }) => {
     if (!response.ok) {
       setError(data.message || "Ошибка авторизации");
     } else {
-      alert("Успешный вход!");
+      setAccessToken(data.access_token);
+      router.push("/home");
     }
   };
 
