@@ -1,3 +1,3 @@
-from .auth import Token, TokenData, TokenPayload
+from .auth import TokenPayload
 
-__all__ = ['Token', 'TokenData', 'TokenPayload']
+__all__ = ['TokenPayload']

@@ -1,8 +1,12 @@
-from fastapi import HTTPException, status, Request
+from fastapi import HTTPException, status, Request, Depends
+from fastapi.security import OAuth2PasswordBearer
 from app.utils.jwt import decode_token
 from app.models.user import UserInDB
-from app.models.token import Token
+from app.models.token import TokenPayload
 from app.services.database import fake_db 
+
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/exchange")
 
 
 async def refresh_cookie_validation(request: Request) -> UserInDB:
@@ -17,7 +21,7 @@ async def refresh_cookie_validation(request: Request) -> UserInDB:
     return user
 
 
-async def accesss_cookie_validation(request: Request) -> UserInDB:
+async def access_cookie_validation(request: Request) -> UserInDB:
     token = request.cookies.get("access_token")
     if not token:
         raise HTTPException(
@@ -29,7 +33,11 @@ async def accesss_cookie_validation(request: Request) -> UserInDB:
     return user
 
 
-async def process_token(token: Token) -> UserInDB:
+async def access_header_validation(token: str = Depends(oauth2_scheme)):
+    return await process_token(token)
+
+
+async def process_token(token: TokenPayload) -> UserInDB:
     payload = await decode_token(token)
     if not payload:
         raise HTTPException(
