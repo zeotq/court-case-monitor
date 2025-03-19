@@ -3,8 +3,9 @@
 import { useState, ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 
-import { Button } from  "@/app/home/components/button";
-import { Input } from "@/app/home/components/input";
+import { Button } from  "@/app/home/components/Button";
+import { Input } from "@/app/home/components/Input";
+import AuthButton from "@/components/AuthButton";
 import { fetchWithAuth } from "@/app/auth/services/fetchWithAuth";
 import { useAuth } from "@/app/auth/components/AuthContext";
 import { logout } from "@/app/services/logout";
@@ -19,7 +20,7 @@ export default function PostRequestPage() {
 
   const sendPostRequest = async () => {
     try {
-      const res = await fetchWithAuth(url, accessToken, setAccessToken, router, {
+      const res = await fetchWithAuth(url, { accessToken, setAccessToken }, router.push, {
         method: "POST",
         mode: "cors",
         headers: {
@@ -48,7 +49,7 @@ export default function PostRequestPage() {
         
         {/* Кнопка для отправки POST-запроса */}
         <Button onClick={sendPostRequest}>Send POST Request</Button>
-        <Button onClick={() => router.push("/auth")}>Login</Button>
+        <AuthButton>Login</AuthButton>
         <Button onClick={() => logout(setAccessToken)}>Logout</Button>
       </div>
       <div>
