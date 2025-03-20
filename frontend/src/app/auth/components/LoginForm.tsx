@@ -1,6 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useAuth } from "@/app/auth/components/AuthContext";
+import getBaseURL from "@/utils/getBaseURL";
+import { generatePKCE } from "@/utils/pkce";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -12,28 +16,61 @@ const LoginForm: React.FC<LoginFormProps> = ({ toggle }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const searchParams = useSearchParams();
+  const router = useRouter()
+  const { setAccessToken } = useAuth();
+
+  const callbackUri = searchParams.get("callback_uri") || getBaseURL() + '/home' ;
+
+  useEffect(() => {
+    const setupPKCE = async () => {
+      const { codeVerifier, codeChallenge } = await generatePKCE();
+      sessionStorage.setItem("code_verifier", codeVerifier);
+      sessionStorage.setItem("code_challenge", codeChallenge);
+    };
+
+    setupPKCE();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
+    const codeVerifier = sessionStorage.getItem("code_verifier");
+    const codeChallenge = sessionStorage.getItem("code_challenge");
+    if (!codeChallenge) {
+      setError("Ошибка генерации PKCE");
+      return;
+    }
+
     const params = new URLSearchParams();
     params.append('username', username);
     params.append('password', password);
+    params.append("code_challenge", codeChallenge);
+    params.append("callback_uri", callbackUri);
 
-    const response = await fetch(`${API_URL}/auth/login`, {
+    const auth_response = await fetch(`${API_URL}/auth/authorize`, {
       method: "POST",
-      mode: "cors",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: params.toString(),
-      credentials: "include",
+      credentials: "include"
     });
 
-    const data = await response.json();
-    if (!response.ok) {
-      setError(data.message || "Ошибка авторизации");
+    const data = await auth_response.json();
+    const authCode = data.code;
+    
+    if (auth_response.ok) {
+      const token_response = await fetch(`${API_URL}/auth/token?code=${authCode}&code_verifier=${codeVerifier}&callback_uri=${callbackUri}`, {credentials: "include"});
+      if (token_response.ok) {
+        const data = await token_response.json();
+        setAccessToken(data.access_token);
+        router.replace(callbackUri);
+      } else {
+        const data = await token_response.json();
+        setError(data.detail || "Ошибка авторизации");
+      }
     } else {
-      alert("Успешный вход!");
+      setError(data.detail || "Ошибка авторизации");
     }
   };
 
@@ -72,4 +109,10 @@ const LoginForm: React.FC<LoginFormProps> = ({ toggle }) => {
   );
 };
 
-export default LoginForm;
+export default function LoginFormWrapper({ toggle }: LoginFormProps) {
+  return (
+    <Suspense fallback={<div>Загрузка...</div>}>
+      <LoginForm toggle={toggle} />
+    </Suspense>
+  );
+}
