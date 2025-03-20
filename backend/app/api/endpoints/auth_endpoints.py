@@ -9,7 +9,7 @@ from app.services.database import fake_db
 from app.services.cache import create_auth_code, validate_auth_code, delete_auth_code
 from app.services.jwt_validation import refresh_cookie_validation
 from app.utils.jwt import create_access_token, create_refresh_token, get_expiration_time
-from app.utils.config import ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_DAYS
+from app.config import ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_DAYS
 
 
 async def authorize_user(
