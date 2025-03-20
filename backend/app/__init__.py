@@ -1,13 +1,14 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.routers import auth_router, external_router
+from app.config import FRONTEND_ORIGIN_1, FRONTEND_ORIGIN_2
 
 
 app = FastAPI()
 
 origins = [
-    "http://localhost:3000",
-    "http://localhost:3001"
+    FRONTEND_ORIGIN_1,
+    FRONTEND_ORIGIN_2
 ]
 
 app.add_middleware(
