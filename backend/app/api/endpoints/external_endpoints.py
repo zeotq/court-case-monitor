@@ -4,13 +4,13 @@ import httpx
 
 from app.models import SearchRequestData
 from app.services.kad_parser import SearchResponseParser
-from app.utils.config import settings
+from app.config import settings, ARBITR_URL
 
 
 async def search_case(
         request: SearchRequestData = Body(...),
     ):
-    url = "https://kad.arbitr.ru/Kad/SearchInstances"
+    url = f"{ARBITR_URL}/Kad/SearchInstances"
 
     data = {
         "Page": 1 if request.Page is None else request.Page,

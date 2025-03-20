@@ -1,14 +1,7 @@
 # Backend
 
-## requirements
-[requirements.txt](requirements.txt)
+## How to run?
 
-## .env
-```
-DATABASE_URL=postgresql://user:password@localhost:5432/db
-SECRET_KEY=secret_key
-ACCESS_TOKEN_EXPIRE_MINUTES=30
-```
-
-## run
-Use unicorn
+### 1. Create all the described configuration [files](/backend/app/config/README.md) 
+### 2. Download python [requirements](/backend/requirements.txt)
+### 3. Run uvicorn app:app (or run [main.py](/backend/main.py))
