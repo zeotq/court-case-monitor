@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 DATABASE_URL = getenv("DATABASE_URL")
-ARBITR_URL=getenv("https://kad.arbitr.ru")
+ARBITR_URL=getenv("ARBITR_URL")
 FRONTEND_ORIGIN_1 = getenv("FRONTEND_ORIGIN_1")
 FRONTEND_ORIGIN_2 = getenv("FRONTEND_ORIGIN_2")
 
