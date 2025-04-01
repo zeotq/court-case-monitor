@@ -24,5 +24,9 @@ Cookie for accessing ARBITR_URL
 
 #### Must have cookies
 ```
-
+ASP.NET_SessionId = 
+.ASPXAUTH = 
+CUID = 
+pr_fp = 
+wasm = 
 ```
