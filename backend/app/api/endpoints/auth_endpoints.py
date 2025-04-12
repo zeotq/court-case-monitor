@@ -142,6 +142,10 @@ async def logout() -> JSONResponse:
 
 
 async def registration(user_data: AuthUserCreate, db: Session):
+    existing_user = db.query(UserDB).filter(UserDB.username == user_data.username).first()
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Username already taken")
+
     try:
         hashed_password = get_password_hash(user_data.password)
         
@@ -153,6 +157,7 @@ async def registration(user_data: AuthUserCreate, db: Session):
         
         db.add(new_user)
         db.commit()
+        db.refresh(new_user)
         
         return JSONResponse(
             content={"message": "User created"}, 

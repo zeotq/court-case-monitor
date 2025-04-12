@@ -37,9 +37,9 @@ async def exchange_refresh_token_for_access_token(request: Request) -> TokenPayl
 async def logout() -> JSONResponse:
     return await auth_endpoints.logout()
 
-@auth_router.post("/register")
+@auth_router.post("/registration")
 async def register(
-        request: AuthUserCreate,
+        form_data: AuthUserCreate,
         db: Session = Depends(get_db)
     ) -> JSONResponse:
-    return await auth_endpoints.registration(request, db)
+    return await auth_endpoints.registration(form_data, db)

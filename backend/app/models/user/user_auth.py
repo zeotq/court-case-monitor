@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, EmailStr
 
 
 class AuthUser(BaseModel):
@@ -11,5 +11,6 @@ class AuthUserInDB(AuthUser):
     hashed_password: str
 
 class AuthUserCreate(AuthUser):
-    email: str
-    password: str
+    username: str = Field(..., min_length=3, max_length=50)
+    email: EmailStr
+    password: str = Field(..., min_length=6)
