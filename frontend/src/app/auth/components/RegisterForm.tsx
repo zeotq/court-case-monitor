@@ -20,16 +20,12 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ toggle }) => {
     e.preventDefault();
     setError("");
 
-    const params = new URLSearchParams();
-    params.append('username', username);
-    params.append('password', password);
-    params.append('email', email)
-
     const response = await fetch(`${API_URL}/auth/registration`, {
       method: "POST",
-      mode: "cors",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: params.toString(),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ username, email, password }),
       credentials: "include",
     });
 
