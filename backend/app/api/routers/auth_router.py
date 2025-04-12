@@ -2,9 +2,11 @@ from fastapi import APIRouter, Request, Depends, Form
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.responses import JSONResponse, RedirectResponse
 from typing import Annotated
+from sqlalchemy.orm import Session
 
+from app.database import get_db
 from app.api.endpoints import auth_endpoints
-from app.models.user import User
+from app.models.user import AuthUserCreate
 from app.models.token import TokenPayload
 
 
@@ -14,9 +16,10 @@ auth_router = APIRouter(prefix="/auth", tags=["auth"])
 async def authorize_user(
         form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
         code_challenge: str = Form(...),
-        callback_uri: str = Form(...)
+        callback_uri: str = Form(...),
+        db: Session = Depends(get_db)
     ) -> JSONResponse:
-    return await auth_endpoints.authorize_user(form_data, code_challenge, callback_uri)
+    return await auth_endpoints.authorize_user(form_data, code_challenge, callback_uri, db)
 
 @auth_router.get("/token")
 async def exchange_code_for_tokens(
@@ -35,5 +38,5 @@ async def logout() -> JSONResponse:
     return await auth_endpoints.logout()
 
 @auth_router.post("/register")
-async def register(request: User) -> JSONResponse:
+async def register(request: AuthUserCreate) -> JSONResponse:
     return await auth_endpoints.registration(request)

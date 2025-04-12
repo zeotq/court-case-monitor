@@ -3,23 +3,53 @@ from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.responses import JSONResponse, RedirectResponse
 from typing import Annotated
 from datetime import timedelta
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
 
-from app.models.user import User
-from app.services.database import fake_db
+from app.models.user import AuthUserCreate, UserDB
+from app.database import SessionLocal, get_db
 from app.services.cache import create_auth_code, validate_auth_code, delete_auth_code
 from app.services.jwt_validation import refresh_cookie_validation
 from app.utils.jwt import create_access_token, create_refresh_token, get_expiration_time
+from app.utils.auth import get_password_hash, verify_password
 from app.config import ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_DAYS
+
+
+async def authenticate_user(db: Session, username: str, password: str) -> UserDB:
+    try:
+        user = db.query(UserDB).filter(UserDB.username == username).first()
+    
+        if not user:
+            return None
+        
+        if not verify_password(password, user.hashed_password):
+            return None
+        
+        return user
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Internal server error: {str(e)}"
+        )
 
 
 async def authorize_user(
         form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
         code_challenge: str,
-        callback_uri: str
+        callback_uri: str,
+        db: Session = Depends(get_db)
     ) -> JSONResponse:
     
-    user = fake_db.authenticate_user(form_data.username, form_data.password)
+    user = await authenticate_user(db, form_data.username, form_data.password)
+
     if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+
+    if not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
@@ -109,5 +139,29 @@ async def logout() -> JSONResponse:
     return response
 
 
-async def registration(request: User):
-    return JSONResponse(content={"message": "User created"}, status_code=status.HTTP_201_CREATED)
+async def registration(user_data: AuthUserCreate):
+    db = SessionLocal()
+    try:
+        hashed_password = get_password_hash(user_data.password)
+        
+        new_user = UserDB(
+            username=user_data.username,
+            email=user_data.email,
+            hashed_password=hashed_password,
+        )
+        
+        db.add(new_user)
+        db.commit()
+        
+        return JSONResponse(
+            content={"message": "User created"}, 
+            status_code=status.HTTP_201_CREATED
+        )
+    except IntegrityError as e:
+        db.rollback()
+        return JSONResponse(
+            content={"error": "Username or email already exists"},
+            status_code=status.HTTP_400_BAD_REQUEST
+        )
+    finally:
+        db.close()
