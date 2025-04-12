@@ -38,5 +38,8 @@ async def logout() -> JSONResponse:
     return await auth_endpoints.logout()
 
 @auth_router.post("/register")
-async def register(request: AuthUserCreate) -> JSONResponse:
-    return await auth_endpoints.registration(request)
+async def register(
+        request: AuthUserCreate,
+        db: Session = Depends(get_db)
+    ) -> JSONResponse:
+    return await auth_endpoints.registration(request, db)

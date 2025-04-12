@@ -15,3 +15,4 @@ class UserDB(Base):
         "OrganisationDB", secondary=user_organisation, back_populates="users"
     )
     tasks = relationship("TaskDB", back_populates="user", cascade="all, delete")
+    bans = relationship("BannedUsersDB", back_populates="user", cascade="all, delete")

@@ -7,30 +7,32 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.models.user import AuthUserCreate, UserDB
+from app.models.blacklist import BannedUsersDB
 from app.database import SessionLocal, get_db
 from app.services.cache import create_auth_code, validate_auth_code, delete_auth_code
 from app.services.jwt_validation import refresh_cookie_validation
 from app.utils.jwt import create_access_token, create_refresh_token, get_expiration_time
 from app.utils.auth import get_password_hash, verify_password
+from app.utils.is_banned import raise_if_user_banned
 from app.config import ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_DAYS
 
 
 async def authenticate_user(db: Session, username: str, password: str) -> UserDB:
     try:
         user = db.query(UserDB).filter(UserDB.username == username).first()
-    
-        if not user:
-            return None
-        
-        if not verify_password(password, user.hashed_password):
-            return None
-        
-        return user
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Internal server error: {str(e)}"
         )
+    
+    if not user:
+            return None
+    
+    raise_if_user_banned(user)
+    if not verify_password(password, user.hashed_password):
+        return None
+    return user
 
 
 async def authorize_user(
@@ -139,8 +141,7 @@ async def logout() -> JSONResponse:
     return response
 
 
-async def registration(user_data: AuthUserCreate):
-    db = SessionLocal()
+async def registration(user_data: AuthUserCreate, db: Session):
     try:
         hashed_password = get_password_hash(user_data.password)
         
