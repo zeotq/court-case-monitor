@@ -4,8 +4,13 @@ services:
       - ./backend/.env.dev
 
   frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
     env_file:
       - ./frontend/.env.local
+    environment:
+      - NODE_ENV=development
 
   db:
     env_file:

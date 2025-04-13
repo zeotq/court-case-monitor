@@ -33,8 +33,8 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ toggle }) => {
     if (!response.ok) {
       setError(data.message || "Ошибка регистрации");
     } else {
-      setAccessToken(data.access_token);
-      alert(data);
+      alert("Ты молодец, ты зарегистрировался!");
+      toggle();
     }
   };
 
