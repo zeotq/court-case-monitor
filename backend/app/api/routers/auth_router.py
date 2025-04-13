@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Request, Depends, Form
 from fastapi.security import OAuth2PasswordRequestForm
-from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.responses import JSONResponse
 from typing import Annotated
 from sqlalchemy.orm import Session
 

@@ -7,13 +7,14 @@ class UserBase(BaseModel):
     username: str
     email: EmailStr
 
-class UserCreate(UserBase):
+class CourtsCreate(BaseModel):
     organisations: Optional[List[OrganisationCreate]] = []
     tasks: Optional[List[TaskCreate]] = []
 
-class UserOut(UserBase):
+class UserPublicFields(UserBase):
     id: int
-    organisations: List[OrganisationOut]
-    tasks: List[Task]
+    organisations: List[OrganisationOut] = []
+    tasks: List[Task] = []
     class Config:
         from_attributes = True
+        orm_mode = True

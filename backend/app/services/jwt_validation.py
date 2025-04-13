@@ -3,16 +3,15 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
 from app.utils.jwt import decode_token
-from app.utils.is_banned import raise_if_user_banned
-from app.models.user import AuthUserInDB, UserDB
-from app.models.blacklist import BannedUsersDB
+from app.services.is_banned import raise_if_user_banned
+from app.models.user import UserPublicFields, UserDB
 from app.models.token import TokenPayload
 from app.database import SessionLocal
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/exchange")
 
 
-async def refresh_cookie_validation(request: Request) -> AuthUserInDB:
+async def refresh_cookie_validation(request: Request) -> UserPublicFields:
     token = request.cookies.get("refresh_token")
     if not token:
         raise HTTPException(
@@ -24,7 +23,7 @@ async def refresh_cookie_validation(request: Request) -> AuthUserInDB:
     return user
 
 
-async def access_cookie_validation(request: Request) -> AuthUserInDB:
+async def access_cookie_validation(request: Request) -> UserPublicFields:
     token = request.cookies.get("access_token")
     if not token:
         raise HTTPException(
@@ -36,11 +35,11 @@ async def access_cookie_validation(request: Request) -> AuthUserInDB:
     return user
 
 
-async def access_header_validation(token: str = Depends(oauth2_scheme)):
+async def access_header_validation(token: str = Depends(oauth2_scheme)) -> UserPublicFields:
     return await process_token(token)
 
 
-async def process_token(token: TokenPayload) -> AuthUserInDB:
+async def process_token(token: TokenPayload) -> UserPublicFields:
     payload = await decode_token(token)
     if not payload:
         raise HTTPException(
@@ -52,7 +51,7 @@ async def process_token(token: TokenPayload) -> AuthUserInDB:
     username: str = payload.sub
     db: Session = SessionLocal()
     user = db.query(UserDB).filter_by(username=username).first()
-    
+
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     raise_if_user_banned(user)

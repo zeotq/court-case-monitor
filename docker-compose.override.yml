@@ -1,0 +1,12 @@
+services:
+  backend:
+    env_file:
+      - ./backend/.env.dev
+
+  frontend:
+    env_file:
+      - ./frontend/.env.local
+
+  db:
+    env_file:
+      - ./.env.db
