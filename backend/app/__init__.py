@@ -1,10 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.routers import auth_router, external_router
+from app.api.routers import account_router, auth_router, external_router
 from app.config import FRONTEND_ORIGIN_1, FRONTEND_ORIGIN_2
-
+from app.database import init_db
 
 app = FastAPI()
+init_db()
 
 origins = [
     FRONTEND_ORIGIN_1,
@@ -19,5 +20,6 @@ app.add_middleware(
     allow_headers=["Content-Type", "Authorization"],
 )
 
+app.include_router(account_router)
 app.include_router(auth_router)
 app.include_router(external_router)
