@@ -7,17 +7,20 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.models.user import AuthUserCreate, UserDB
-from app.models.blacklist import BannedUsersDB
-from app.database import SessionLocal, get_db
+from app.database import get_db
 from app.services.cache import create_auth_code, validate_auth_code, delete_auth_code
 from app.services.jwt_validation import refresh_cookie_validation
+from app.services.is_banned import raise_if_user_banned
 from app.utils.jwt import create_access_token, create_refresh_token, get_expiration_time
 from app.utils.auth import get_password_hash, verify_password
-from app.utils.is_banned import raise_if_user_banned
 from app.config import ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_DAYS
 
 
-async def authenticate_user(db: Session, username: str, password: str) -> UserDB:
+async def authenticate_user(
+        username: str, 
+        password: str,
+        db: Session 
+    ) -> UserDB:
     try:
         user = db.query(UserDB).filter(UserDB.username == username).first()
     except Exception as e:
@@ -39,10 +42,10 @@ async def authorize_user(
         form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
         code_challenge: str,
         callback_uri: str,
-        db: Session = Depends(get_db)
+        db: Session,
     ) -> JSONResponse:
     
-    user = await authenticate_user(db, form_data.username, form_data.password)
+    user = await authenticate_user(form_data.username, form_data.password, db)
 
     if not user:
         raise HTTPException(
@@ -141,7 +144,10 @@ async def logout() -> JSONResponse:
     return response
 
 
-async def registration(user_data: AuthUserCreate, db: Session):
+async def registration(
+        user_data: AuthUserCreate, 
+        db: Session = Depends(get_db),
+    ):
     existing_user = db.query(UserDB).filter(UserDB.username == user_data.username).first()
     if existing_user:
         raise HTTPException(status_code=400, detail="Username already taken")

@@ -1,13 +1,13 @@
-from .user_auth import AuthUser, AuthUserCreate, AuthUserInDB
+from .user_schema import UserBase, CourtsCreate, UserPublicFields
+from .user_auth import AuthUserCreate, AuthUserCheck
 from .user_db import UserDB
-from .user_schema import UserBase, UserCreate, UserOut
 
 __all__ = [
     "UserBase",
-    "UserCreate",
-    "UserOut",
+    "CourtsCreate",
+    "UserPublicFields",
     "AuthUser",
     "AuthUserCreate",
-    "AuthUserInDB",
+    "AuthUserCheck",
     "UserDB"
 ]

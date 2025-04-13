@@ -2,11 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.routers import account_router, auth_router, external_router
 from app.config import FRONTEND_ORIGIN_1, FRONTEND_ORIGIN_2
-
-from app.models.user.user_db import UserDB
-from app.models.task.task_db import TaskDB
-from app.models.organisation.organisation_db import OrganisationDB
-from app.database import init_db, SessionLocal
+from app.database import init_db
 
 app = FastAPI()
 init_db()

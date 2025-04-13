@@ -2,7 +2,7 @@ from fastapi import HTTPException, Body, status
 from fastapi.responses import JSONResponse
 import httpx
 
-from app.models import SearchRequestData
+from app.models.arbitr import SearchRequestData
 from app.services.kad_parser import SearchResponseParser
 from app.config import settings, ARBITR_URL
 

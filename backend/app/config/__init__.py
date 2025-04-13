@@ -1,5 +1,7 @@
 from .load_project_env import (
     DATABASE_URL,
+    DATABASE_DROP_ALL,
+    DATABASE_ECHO,
     ARBITR_URL,
     FRONTEND_ORIGIN_1,
     FRONTEND_ORIGIN_2,
@@ -12,6 +14,8 @@ from .load_project_ini import settings
 
 __all__ = [
     'DATABASE_URL',
+    'DATABASE_DROP_ALL',
+    'DATABASE_ECHO',
     'ARBITR_URL',
     'FRONTEND_ORIGIN_1',
     'FRONTEND_ORIGIN_2',
