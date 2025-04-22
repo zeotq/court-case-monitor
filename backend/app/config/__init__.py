@@ -10,7 +10,7 @@ from .load_project_env import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
     REFRESH_TOKEN_EXPIRE_DAYS,
 )
-from .load_project_ini import settings
+from .load_project_settings import settings
 
 __all__ = [
     'DATABASE_URL',
