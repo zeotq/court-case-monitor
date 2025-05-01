@@ -29,6 +29,8 @@ async def search_case(
         request: SearchRequestData = Body(...),
     ):
     SEARCH_URL = f"{ARBITR_URL}/Kad/SearchInstances"
+    if not settings.cookies:
+        settings.cookies = await fetch_cookies_from_file()
 
     data = {
         "Page": 1 if request.Page is None else request.Page,
@@ -47,7 +49,7 @@ async def search_case(
             response = await client.post(SEARCH_URL, headers=settings.headers, cookies=settings.cookies, json=data)
             response.raise_for_status()
     except httpx.HTTPStatusError as e:
-        settings.cookies = await fetch_cookies_from_file()
+        settings.cookies = await fetch_cookies()
         raise HTTPException(status_code=response.status_code, detail=f"Try again.\nhttpx.HTTPStatusError at search_case: {e}")
     except httpx.RequestError as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"httpx.RequestError: {e}")
