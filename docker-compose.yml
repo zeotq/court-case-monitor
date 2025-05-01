@@ -1,5 +1,18 @@
 services:
+  cookie:
+    build:
+      context: ./cookie-fetcher
+      dockerfile: Dockerfile
+    volumes:
+      - ./cookie-fetcher:/app
+      - ./cookie-fetcher/data:/app/data
+    ports:
+      - "8041:8041"
+    shm_size: '1gb'
+    restart: on-failure
+
   backend:
+    shm_size: '1gb'
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -9,7 +22,7 @@ services:
       - db
     volumes:
       - ./backend:/app
-    restart: always
+    restart: on-failure
 
   frontend:
     build:
@@ -21,11 +34,11 @@ services:
       - backend
     volumes:
       - ./frontend:/app
-    restart: always
+    restart: on-failure
 
   db:
     image: postgres:16
-    restart: always
+    restart: on-failure
     ports:
       - "5432:5432"
     volumes:

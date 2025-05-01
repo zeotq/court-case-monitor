@@ -8,8 +8,6 @@ class Settings:
 
     config.read(private_dir / 'headers_config.ini')
     headers = dict(config.items('headers'))
-
-    config.read(private_dir / 'cookies_config.ini')
-    cookies = dict(config.items('cookies'))
+    cookies = dict()
 
 settings = Settings()

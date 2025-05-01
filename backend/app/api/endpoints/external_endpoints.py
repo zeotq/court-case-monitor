@@ -1,19 +1,24 @@
 from fastapi import HTTPException, Body, status
 from fastapi.responses import JSONResponse
-from time import time
-from random import randint
 import httpx
 
 from app.models.arbitr import SearchRequestData
 from app.utils.kad_parser import SearchResponseParser
-from app.utils.kad_access_cookies import get_cookies_dict
-from app.config import settings, ARBITR_URL
+from app.config import settings, ARBITR_URL, COOKIE_URL
 
 
-async def update_cookies():
-    new_cookies = await get_cookies_dict(headless=True, debug=True)
-    print(f"New Cookies: {new_cookies}")
-    settings.cookies.update(new_cookies)
+async def fetch_cookies_from_file():
+    async with httpx.AsyncClient() as client:
+        r = await client.get(f"{COOKIE_URL}/cookies/file", timeout=60)
+        r.raise_for_status()
+        return r.json()
+
+
+async def fetch_cookies():
+    async with httpx.AsyncClient() as client:
+        r = await client.get(f"{COOKIE_URL}/cookies?headless=false&debug=false", timeout=60)
+        r.raise_for_status()
+        return r.json()
 
 
 async def need_captcha():
@@ -42,8 +47,8 @@ async def search_case(
             response = await client.post(SEARCH_URL, headers=settings.headers, cookies=settings.cookies, json=data)
             response.raise_for_status()
     except httpx.HTTPStatusError as e:
-        await update_cookies()
-        raise HTTPException(status_code=response.status_code, detail=f"httpx.HTTPStatusError at search_case: {e}")
+        settings.cookies = await fetch_cookies_from_file()
+        raise HTTPException(status_code=response.status_code, detail=f"Try again.\nhttpx.HTTPStatusError at search_case: {e}")
     except httpx.RequestError as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"httpx.RequestError: {e}")
 

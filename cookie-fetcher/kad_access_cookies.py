@@ -1,4 +1,5 @@
 from playwright.async_api import async_playwright
+ARBITR_URL = "https://kad.arbitr.ru"
 
 
 def _print_log(i: str, t: str = None):
@@ -28,7 +29,7 @@ async def get_browser_data(headless: bool = True, debug: bool = False):
                     '--enable-webgl',
                     '--enable-accelerated-2d-canvas',
                     '--font-render-hinting=none',
-                    '--disable-gpu', #
+                    '--disable-gpu',
                     '--disable-blink-features=AutomationControlled',
                     '--disable-setuid-sandbox',
                     '--disable-dev-shm-usage',
@@ -39,11 +40,10 @@ async def get_browser_data(headless: bool = True, debug: bool = False):
                     '--mute-audio',
                     '--no-first-run',
                     '--no-sandbox',
-                    # '--no-zygote',
                     '--hide-scrollbars',
                     '--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
                     '--window-size=1280,720'
-                ], # + (['--headless=new'] if headless else []),
+                ],
                 chromium_sandbox=False,
                 firefox_user_prefs={
                     "privacy.resistFingerprinting": False,
@@ -149,7 +149,7 @@ async def get_browser_data(headless: bool = True, debug: bool = False):
 
             # Навигация с улучшенным ожиданием
             await page.goto(
-                'https://bot.sannysoft.com/?ref=design-foundations',
+                ARBITR_URL,
                 wait_until='networkidle',
                 timeout=10000
             )
