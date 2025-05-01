@@ -10,3 +10,4 @@ services:
   db:
     env_file:
       - ./.env.db
+    ports: []
