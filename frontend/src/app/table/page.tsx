@@ -1,8 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, ChangeEvent } from 'react';
 import Link from 'next/link';
-import { Button } from '@/app/home/components/Button';
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/app/auth/components/AuthContext";
+import { fetchWithAuth } from "@/app/auth/services/fetchWithAuth";
+import { Input } from "@/app/home/components/Input";
+import { Button } from "@/app/home/components/Button";
+import Filter, { Filters } from "@/app/table/components/Filter";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 type Party = {
   name: string | null;
@@ -19,86 +26,116 @@ type CaseData = {
   respondent: Party;
 };
 
-const sampleData: CaseData[] = [
-  {
-    date: '30.04.2025 0:00:00',
-    case_number: 'СИП-377/2025',
-    case_link: 'https://kad.arbitr.ru/Card/2ca2d01e-bd04-4587-865f-f16210b04d5a',
-    judge: null,
-    court: null,
-    plaintiff: {
-      name: 'ООО Группа компаний "ФЕНИКС"',
-      inn: '6165231191',
-    },
-    respondent: {
-      name: 'ООО "КББ"',
-      inn: '7806286171',
-    },
-  },
-  {
-    date: null,
-    case_number: 'СИП-376/2025',
-    case_link: 'https://kad.arbitr.ru/Card/c15d8ff5-c015-431b-8182-9cb8045dae80',
-    judge: null,
-    court: null,
-    plaintiff: {
-      name: 'ООО "Яндекс"',
-      inn: '7736207543',
-    },
-    respondent: {
-      name: null,
-      inn: null,
-    },
-  },
-];
-
 export default function CasesTablePage() {
   const [cases, setCases] = useState<CaseData[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [filterNumber, setFilterNumber] = useState<string>("");
+  const [filters, setFilters] = useState<Filters>({});
+
+  const { accessToken, setAccessToken } = useAuth();
+  const router = useRouter();
+
+  const fetchCases = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const res = await fetchWithAuth(
+        `${API_URL}/case/search`,
+        { accessToken, setAccessToken },
+        router.push,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ...filters,
+            CaseNumbers: filters.CaseNumbers || undefined,
+            Courts: filters.Courts || undefined,
+            Judges: filters.Judges?.map(judge => ({ JudgeId: judge })) || undefined,
+            Sides: filters.Sides?.map(side => ({
+              Name: side.Name,
+              Type: side.Type,
+              ExactMatch: side.ExactMatch
+            })) || undefined,
+            DateFrom: filters.DateFrom,
+            DateTo: filters.DateTo,
+            WithVKSInstances: filters.WithVKSInstances
+          }),
+        }
+      );
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`Ошибка ${res.status}: ${text}`);
+      }
+
+      const data = await res.json();
+      setCases(data.cases || []);
+    } catch (err: any) {
+      console.error("Error fetching cases:", err);
+      setError(err.message || "Unknown error");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    // Здесь вы можете заменить sampleData на результат fetch
-    setCases(sampleData);
-  }, []);
-
+    fetchCases();
+  }, [accessToken]);
+  
   return (
-    <div className="p-4">
-      <h1 className="text-xl font-bold mb-4">Список дел</h1>
-      <div className="overflow-x-auto">
-        <table className="min-w-full border border-red-500 color-foreground">
-          <thead className="bg-foreground text-background">
-            <tr>
-              <th className="border px-4 py-2">Дата</th>
-              <th className="border px-4 py-2">Номер дела</th>
-              <th className="border px-4 py-2">Истец</th>
-              <th className="border px-4 py-2">Ответчик</th>
-              <th className="border px-4 py-2">Судья</th>
-              <th className="border px-4 py-2">Суд</th>
-            </tr>
-          </thead>
-          <tbody>
-            {cases.map((c, i) => (
-              <tr key={i} className="">
-                <td className="border px-4 py-2">{c.date ?? '—'}</td>
-                <td className="border px-4 py-2">
-                  <Link href={c.case_link} target="_blank" className="text-blue-600 underline">
-                    {c.case_number}
-                  </Link>
-                </td>
-                <td className="border px-4 py-2">
-                  {c.plaintiff.name ?? '—'}<br />
-                  <small className="text-gray-500">{c.plaintiff.inn ?? ''}</small>
-                </td>
-                <td className="border px-4 py-2">
-                  {c.respondent.name ?? '—'}<br />
-                  <small className="text-gray-500">{c.respondent.inn ?? ''}</small>
-                </td>
-                <td className="border px-4 py-2">{c.judge ?? '—'}</td>
-                <td className="border px-4 py-2">{c.court ?? '—'}</td>
+    <div className="p-4 space-y-4">
+    <h1 className="text-xl font-bold">Список дел</h1>
+    
+    <Filter filters={filters} setFilters={setFilters} />
+    
+    <div className="flex justify-end">
+      <Button onClick={fetchCases}>Применить фильтры</Button>
+    </div>
+
+      {loading && <p>Загрузка...</p>}
+      {error && <p className="text-red-600">Ошибка: {error}</p>}
+
+      {!loading && !error && (
+        <div className="overflow-x-auto">
+          <table className="min-w-full border border-red-500 color-foreground">
+            <thead className="bg-foreground text-background">
+              <tr>
+                <th className="border px-4 py-2">Дата</th>
+                <th className="border px-4 py-2">Номер дела</th>
+                <th className="border px-4 py-2">Истец</th>
+                <th className="border px-4 py-2">Ответчик</th>
+                <th className="border px-4 py-2">Судья</th>
+                <th className="border px-4 py-2">Суд</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {cases.map((c, i) => (
+                <tr key={i}>
+                  <td className="border px-4 py-2">{c.date ?? '—'}</td>
+                  <td className="border px-4 py-2">
+                    <Link href={c.case_link} target="_blank" className="text-blue-600 underline">
+                      {c.case_number}
+                    </Link>
+                  </td>
+                  <td className="border px-4 py-2">
+                    {c.plaintiff?.name ?? '—'}<br />
+                    <small className="text-gray-500">{c.plaintiff?.inn ?? ''}</small>
+                  </td>
+                  <td className="border px-4 py-2">
+                    {c.respondent?.name ?? '—'}<br />
+                    <small className="text-gray-500">{c.respondent?.inn ?? ''}</small>
+                  </td>
+                  <td className="border px-4 py-2">{c.judge ?? '—'}</td>
+                  <td className="border px-4 py-2">{c.court ?? '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }
