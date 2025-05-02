@@ -9,10 +9,14 @@ class UserDB(Base):
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True, index=True, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
-    hashed_password = Column(String, nullable=False)
+    hashed_password = Column(String(128), nullable=False)
 
     organisations = relationship(
-        "OrganisationDB", secondary=user_organisation, back_populates="users"
+        "OrganisationDB", secondary=user_organisation, back_populates="users", passive_deletes=True
     )
-    tasks = relationship("TaskDB", back_populates="user", cascade="all, delete")
-    bans = relationship("BannedUsersDB", back_populates="user", cascade="all, delete")
+    tasks = relationship(
+        "TaskDB", back_populates="user", cascade="all, delete"
+        )
+    bans = relationship(
+        "BannedUsersDB", back_populates="user", cascade="all, delete"
+        )

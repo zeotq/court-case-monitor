@@ -8,10 +8,16 @@ class OrganisationDB(Base):
     __tablename__ = "organisations"
 
     id = Column(Integer, primary_key=True, index=True)
-    inn = Column(String, unique=True, nullable=False)
-    ogrn = Column(String, unique=True, nullable=False)
-    name = Column(String, nullable=False)
+    inn = Column(String(12), nullable=True)
+    name = Column(String(255), nullable=False)
 
     users = relationship(
-        "UserDB", secondary=user_organisation, back_populates="organisations"
+        "UserDB", secondary=user_organisation, back_populates="organisations", passive_deletes=True
+    )
+    
+    cases_as_plaintiff = relationship(
+        "CourtCaseDB", foreign_keys="CourtCaseDB.plaintiff_id", back_populates="plaintiff"
+    )
+    cases_as_respondent = relationship(
+        "CourtCaseDB", foreign_keys="CourtCaseDB.respondent_id", back_populates="respondent"
     )
