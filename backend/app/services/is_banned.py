@@ -3,7 +3,7 @@ from app.models.blacklist import BannedUsersDB
 from app.models.user import UserDB
 
 
-def raise_if_user_banned(user: UserDB) -> HTTPException:
+async def raise_if_user_banned(user: UserDB) -> None:
     if user.bans:
         latest_ban: BannedUsersDB = user.bans[-1]
         raise HTTPException(
