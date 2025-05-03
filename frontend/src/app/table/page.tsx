@@ -5,9 +5,9 @@ import Link from 'next/link';
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/auth/components/AuthContext";
 import { fetchWithAuth } from "@/app/auth/services/fetchWithAuth";
-import { Input } from "@/app/home/components/Input";
-import { Button } from "@/app/home/components/Button";
 import Filter, { Filters } from "@/app/table/components/Filter";
+import { Button } from "@/components/Button";
+import TopBar from "@/components/TopBar";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -57,7 +57,7 @@ export default function CasesTablePage() {
             Judges: filters.Judges?.map(judge => ({ JudgeId: judge })) || undefined,
             Sides: filters.Sides?.map(side => ({
               Name: side.Name,
-              Type: side.Type,
+              Inn: side.Inn,
               ExactMatch: side.ExactMatch
             })) || undefined,
             DateFrom: filters.DateFrom,
@@ -82,12 +82,20 @@ export default function CasesTablePage() {
   };
 
   useEffect(() => {
-    fetchCases();
+    if (accessToken) {
+      fetchCases();
+    }
   }, [accessToken]);
   
   return (
     <div className="p-4 space-y-4">
-    <h1 className="text-xl font-bold">Список дел</h1>
+
+    <TopBar>
+      <div>
+        <h1 className="text-xl font-bold">Список дел</h1>
+      </div>
+    </TopBar>
+    
     
     <Filter filters={filters} setFilters={setFilters} />
     

@@ -1,12 +1,12 @@
 'use client';
 
 import { ChangeEvent } from 'react';
-import { Input } from "@/app/home/components/Input";
-import { Button } from "@/app/home/components/Button";
+import { Input } from "@/app/table/components/Input";
+import { Button } from "@/components/Button";
 
 interface Side {
     Name?: string;
-    Type?: number;
+    Inn?: string;
     ExactMatch?: boolean;
   }
 
@@ -27,12 +27,20 @@ export default function Filter({
   filters: Filters;
   setFilters: (filters: Filters) => void;
 }) {
+
   const handleArrayChange = (
     e: ChangeEvent<HTMLInputElement>,
     field: keyof Filters
   ) => {
-    const values = e.target.value.split(',').map(v => v.trim());
-    setFilters({ ...filters, [field]: values.filter(v => v) });
+    setFilters({ ...filters, [field]: e.target.value });
+  };
+
+  const handleArrayBlur = (field: keyof Filters) => {
+    const value = filters[field] as unknown as string;
+    if (typeof value === 'string') {
+      const values = value.split(',').map(v => v.trim()).filter(v => v);
+      setFilters({ ...filters, [field]: values });
+    }
   };
 
   const handleSideChange = (
@@ -44,8 +52,8 @@ export default function Filter({
     const target = e.target;
     let value: string | number | boolean | undefined;
   
-    if (field === 'Type') {
-      value = target.value ? parseInt(target.value) : undefined;
+    if (field === 'Inn') {
+      value = target.value || undefined;
     } else if (field === 'ExactMatch') {
       value = target.checked;
     } else {
@@ -90,8 +98,9 @@ export default function Filter({
         <div className="space-y-2">
           <label className="block text-sm font-medium">Номера дел (через запятую)</label>
           <Input
-            value={filters.CaseNumbers?.join(', ') || ''}
+            value={Array.isArray(filters.CaseNumbers) ? filters.CaseNumbers.join(', ') : filters.CaseNumbers || ''}
             onChange={e => handleArrayChange(e, 'CaseNumbers')}
+            onBlur={() => handleArrayBlur('CaseNumbers')}
           />
         </div>
 
@@ -99,8 +108,9 @@ export default function Filter({
         <div className="space-y-2">
           <label className="block text-sm font-medium">Суды (через запятую)</label>
           <Input
-            value={filters.Courts?.join(', ') || ''}
+            value={Array.isArray(filters.Courts) ? filters.Courts.join(', ') : filters.Courts || ''}
             onChange={e => handleArrayChange(e, 'Courts')}
+            onBlur={() => handleArrayBlur('Courts')}
           />
         </div>
 
@@ -108,8 +118,9 @@ export default function Filter({
         <div className="space-y-2">
           <label className="block text-sm font-medium">Судьи (через запятую)</label>
           <Input
-            value={filters.Judges?.join(', ') || ''}
+            value={Array.isArray(filters.Judges) ? filters.Judges.join(', ') : filters.Judges || ''}
             onChange={e => handleArrayChange(e, 'Judges')}
+            onBlur={() => handleArrayBlur('Judges')}
           />
         </div>
 
@@ -142,19 +153,11 @@ export default function Filter({
             onChange={e => handleSideChange(e, index, 'Name')}
             />
             <Input
-            placeholder="Тип"
+            placeholder="ИНН"
             type="number"
-            value={side.Type ?? ''}
-            onChange={e => handleSideChange(e, index, 'Type')}
+            value={side.Inn ?? ''}
+            onChange={e => handleSideChange(e, index, 'Inn')}
             />
-            <label className="flex items-center gap-2">
-            <input
-                type="checkbox"
-                checked={side.ExactMatch || false}
-                onChange={e => handleSideChange(e, index, 'ExactMatch')}
-            />
-            Точное совпадение
-            </label>
             <Button
               onClick={() => removeSide(index)}
             >

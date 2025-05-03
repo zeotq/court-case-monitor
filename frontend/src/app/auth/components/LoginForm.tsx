@@ -20,7 +20,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ toggle }) => {
   const router = useRouter()
   const { setAccessToken } = useAuth();
 
-  const callbackUri = searchParams.get("callback_uri") || getBaseURL() + '/home' ;
+  const callbackUri = searchParams.get("callback_uri") || getBaseURL();
 
   useEffect(() => {
     const setupPKCE = async () => {
