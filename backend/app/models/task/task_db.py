@@ -10,4 +10,6 @@ class TaskDB(Base):
     title = Column(String, nullable=False)
     user_id = Column(Integer, ForeignKey("users.id"))
 
-    user = relationship("UserDB", back_populates="tasks")
+    user = relationship(
+        "UserDB", back_populates="tasks"
+        )

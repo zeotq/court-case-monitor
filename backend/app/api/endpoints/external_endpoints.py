@@ -1,9 +1,11 @@
-from fastapi import HTTPException, Body, status
-from fastapi.responses import JSONResponse
 import httpx
+from fastapi import HTTPException, status
+from fastapi.responses import JSONResponse
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.arbitr import SearchRequestData
 from app.utils.kad_parser import SearchResponseParser
+from app.services.case_base import save_cases_to_db
 from app.config import settings, ARBITR_URL, COOKIE_URL
 
 
@@ -26,7 +28,8 @@ async def need_captcha():
 
 
 async def search_case(
-        request: SearchRequestData = Body(...),
+        request: SearchRequestData,
+        session: AsyncSession
     ):
     SEARCH_URL = f"{ARBITR_URL}/Kad/SearchInstances"
     if not settings.cookies:
@@ -39,7 +42,7 @@ async def search_case(
         "DateFrom": request.DateFrom.isoformat() if request.DateFrom else None,
         "DateTo": request.DateTo.isoformat() if request.DateTo else None,
         "Sides": [side.model_dump() for side in (request.Sides or [])],
-        "Judges": [judge.model_dump() for judge in (request.Judges or [])],
+        "Judges": [judge.JudgeId for judge in (request.Judges or [])],
         "CaseNumbers": request.CaseNumbers or [],
         "WithVKSInstances": request.WithVKSInstances or False
     }
@@ -50,10 +53,13 @@ async def search_case(
             response.raise_for_status()
     except httpx.HTTPStatusError as e:
         settings.cookies = await fetch_cookies()
-        raise HTTPException(status_code=response.status_code, detail=f"Try again.\nhttpx.HTTPStatusError at search_case: {e}")
+        raise HTTPException(status_code=response.status_code, detail=f"Try again later. {e}")
     except httpx.RequestError as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"httpx.RequestError: {e}")
 
-    parsed_repsonse_text = SearchResponseParser.parse(response.text)
+    parsed_response_text = SearchResponseParser.parse(response.text)
 
-    return JSONResponse(content=parsed_repsonse_text, status_code=response.status_code)
+    parsed_response_text = SearchResponseParser.parse(response.text)
+    await save_cases_to_db(session, parsed_response_text['cases'])
+
+    return JSONResponse(content=parsed_response_text, status_code=response.status_code)

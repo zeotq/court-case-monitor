@@ -3,6 +3,7 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import fullURL from "@/utils/getFullURL"
+import { Button } from "./Button";
 
 export interface AuthButtonProps {
   children: React.ReactNode;
@@ -19,12 +20,11 @@ const AuthButton: React.FC<AuthButtonProps> = ({ children, redirectUri: callback
   };
 
   return (
-    <button
-      className="px-6 py-3 text-lg font-medium text-white bg-blue-600 rounded-lg shadow-md hover:bg-blue-700 transition"
+    <Button
       onClick={handleRedirect}
     >
       {children}
-    </button>
+    </Button>
   );
 };
 

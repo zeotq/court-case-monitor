@@ -21,14 +21,14 @@ class SearchResponseParser:
             # Дата и номер дела
             num_td = row.find("td", class_="num")
             if num_td:
-                date_div = num_td.find("div", class_="civil")
-                case_data["date"] = SearchResponseParser.clean_text(date_div.get("title", "")) if date_div else None
+                date_div = num_td.find("div", {"title": True})
+                if date_div:
+                    case_data["date"] = SearchResponseParser.clean_text(date_div.get("title", ""))
 
                 case_link = num_td.find("a", class_="num_case")
                 if case_link:
                     case_data["case_number"] = SearchResponseParser.clean_text(case_link.text)
                     href = case_link.get("href", "")
-                    # Если ссылка не начинается с "http", добавляем базовый URL
                     if not href.startswith("http"):
                         href = "https://kad.arbitr.ru" + href
                     case_data["case_link"] = href
@@ -36,18 +36,19 @@ class SearchResponseParser:
             # Суд и судья
             court_td = row.find("td", class_="court")
             if court_td:
-                judge_div = court_td.find("div", class_="judge")
-                case_data["judge"] = SearchResponseParser.clean_text(judge_div.get("title", "")) if judge_div else None
+                court_div = court_td.find("div", {"title": True}, class_=lambda x: x != "judge")
+                if court_div:
+                    case_data["court"] = SearchResponseParser.clean_text(court_div.get("title", ""))
 
-                court_div = judge_div.find_next_sibling("div") if judge_div else None
-                case_data["court"] = SearchResponseParser.clean_text(court_div.get("title", "")) if court_div else None
+                judge_div = court_td.find("div", class_="judge")
+                if judge_div:
+                    case_data["judge"] = SearchResponseParser.clean_text(judge_div.get("title", ""))
 
             # Истец (plaintiff)
             plaintiff_td = row.find("td", class_="plaintiff")
             if plaintiff_td:
                 plaintiff_span = plaintiff_td.find("span", class_="js-rollover")
                 if plaintiff_span:
-                    # Берём только первый текстовый узел (видимый текст)
                     raw_name = plaintiff_span.find(text=True, recursive=False)
                     plaintiff_name = SearchResponseParser.clean_text(raw_name)
                 else:

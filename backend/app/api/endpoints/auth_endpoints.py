@@ -1,10 +1,14 @@
 from fastapi import status, Request, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.responses import JSONResponse, RedirectResponse
+
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+from sqlalchemy.orm import selectinload
+
 from typing import Annotated
 from datetime import timedelta
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
 
 from app.models.user import AuthUserCreate, UserDB
 from app.database import get_db
@@ -19,10 +23,14 @@ from app.config import ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_DAYS
 async def authenticate_user(
         username: str, 
         password: str,
-        db: Session 
+        db: AsyncSession 
     ) -> UserDB:
     try:
-        user = db.query(UserDB).filter(UserDB.username == username).first()
+        result = await db.execute(
+            select(UserDB)
+            .options(selectinload(UserDB.bans))
+            .where(UserDB.username == username))
+        user = result.scalar_one_or_none()
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -32,7 +40,8 @@ async def authenticate_user(
     if not user:
             return None
     
-    raise_if_user_banned(user)
+    await raise_if_user_banned(user)
+    
     if not verify_password(password, user.hashed_password):
         return None
     return user
@@ -42,19 +51,12 @@ async def authorize_user(
         form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
         code_challenge: str,
         callback_uri: str,
-        db: Session,
+        db: AsyncSession,
     ) -> JSONResponse:
     
     user = await authenticate_user(form_data.username, form_data.password, db)
 
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"}
-        )
-
-    if not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
@@ -146,9 +148,11 @@ async def logout() -> JSONResponse:
 
 async def registration(
         user_data: AuthUserCreate, 
-        db: Session = Depends(get_db),
+        db: AsyncSession = Depends(get_db),
     ):
-    existing_user = db.query(UserDB).filter(UserDB.username == user_data.username).first()
+    result = await db.execute(select(UserDB).where(UserDB.username == user_data.username))
+    existing_user = result.scalar_one_or_none()
+
     if existing_user:
         raise HTTPException(status_code=400, detail="Username already taken")
 
@@ -162,18 +166,16 @@ async def registration(
         )
         
         db.add(new_user)
-        db.commit()
-        db.refresh(new_user)
+        await db.commit()
+        await db.refresh(new_user)
         
         return JSONResponse(
             content={"message": "User created"}, 
             status_code=status.HTTP_201_CREATED
         )
     except IntegrityError as e:
-        db.rollback()
+        await db.rollback()
         return JSONResponse(
             content={"error": "Username or email already exists"},
             status_code=status.HTTP_400_BAD_REQUEST
         )
-    finally:
-        db.close()
