@@ -14,7 +14,6 @@ async def search_case_in_db(
     request: SearchRequestData,
     session: AsyncSession,
 ):
-    print(request)
     try:
         stmt = select(CourtCaseDB).options(
             joinedload(CourtCaseDB.plaintiff),
@@ -48,12 +47,12 @@ async def search_case_in_db(
             for case in cases:
                 for side in request.Sides:
                     match = False
-                    if side.name:
-                        match |= (case.plaintiff and case.plaintiff.name == side.name) or \
-                                 (case.respondent and case.respondent.name == side.name)
-                    if side.inn:
-                        match |= (case.plaintiff and case.plaintiff.inn == side.inn) or \
-                                 (case.respondent and case.respondent.inn == side.inn)
+                    if side.Name:
+                        match |= (case.plaintiff and case.plaintiff.name == side.Name) or \
+                                 (case.respondent and case.respondent.name == side.Name)
+                    if side.Inn:
+                        match |= (case.plaintiff and case.plaintiff.inn == side.Inn) or \
+                                 (case.respondent and case.respondent.inn == side.Inn)
                     if match:
                         sides_filtered.append(case)
                         break

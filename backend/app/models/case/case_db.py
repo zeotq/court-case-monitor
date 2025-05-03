@@ -8,11 +8,11 @@ class CourtCaseDB(Base):
     __tablename__ = "court_cases"
 
     id = Column(Integer, primary_key=True, index=True)
-    date = Column(DateTime, nullable=False)
-    case_number = Column(String(50), nullable=False, unique=True)
+    date = Column(DateTime)
+    case_number = Column(String(50), unique=True)
     case_link = Column(String(512))
     court = Column(String(255))
-    
+    judge = Column(String(64))
 
     plaintiff_id = Column(Integer, ForeignKey('organisations.id'), nullable=True, index=True)
     respondent_id = Column(Integer, ForeignKey('organisations.id'), nullable=True, index=True)

@@ -42,7 +42,7 @@ async def search_case(
         "DateFrom": request.DateFrom.isoformat() if request.DateFrom else None,
         "DateTo": request.DateTo.isoformat() if request.DateTo else None,
         "Sides": [side.model_dump() for side in (request.Sides or [])],
-        "Judges": [judge.model_dump() for judge in (request.Judges or [])],
+        "Judges": [judge.JudgeId for judge in (request.Judges or [])],
         "CaseNumbers": request.CaseNumbers or [],
         "WithVKSInstances": request.WithVKSInstances or False
     }

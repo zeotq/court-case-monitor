@@ -36,7 +36,7 @@ class SearchResponseParser:
             # Суд и судья
             court_td = row.find("td", class_="court")
             if court_td:
-                court_div = court_td.find("div", {"title": True})
+                court_div = court_td.find("div", {"title": True}, class_=lambda x: x != "judge")
                 if court_div:
                     case_data["court"] = SearchResponseParser.clean_text(court_div.get("title", ""))
 

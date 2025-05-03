@@ -9,7 +9,7 @@ class OrganisationDB(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     inn = Column(String(12), nullable=True)
-    name = Column(String(255), nullable=False)
+    name = Column(String(255), nullable=True)
 
     users = relationship(
         "UserDB", secondary=user_organisation, back_populates="organisations", passive_deletes=True

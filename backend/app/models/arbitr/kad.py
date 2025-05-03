@@ -3,9 +3,10 @@ from typing import List, Optional
 
 
 class Side(BaseModel):
-    Name: str = None
-    Type: int = None
-    ExactMatch: bool = None
+    Name: Optional[str] = None
+    Type: Optional[int] = None
+    Inn: Optional[str] = None
+    ExactMatch: Optional[bool] = None
 
 class Judge(BaseModel):
     JudgeId: Optional[str] = None
