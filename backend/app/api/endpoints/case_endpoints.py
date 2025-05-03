@@ -25,6 +25,9 @@ async def search_case_in_db(
         if request.Courts:
             filters.append(CourtCaseDB.court.in_(request.Courts))
 
+        if request.Judges:
+            filters.append(CourtCaseDB.judge.in_(map(lambda a: a.JudgeId, request.Judges)))
+
         if request.DateFrom:
             date_from = datetime.strptime(request.DateFrom, "%Y-%m-%d").date()
             filters.append(CourtCaseDB.date >= date_from)
@@ -66,6 +69,7 @@ async def search_case_in_db(
                 "case_number": case.case_number,
                 "case_link": case.case_link,
                 "court": case.court,
+                "judge": case.judge,
                 "plaintiff": {
                     "name": case.plaintiff.name if case.plaintiff else None,
                     "inn": case.plaintiff.inn if case.plaintiff else None

@@ -34,8 +34,8 @@ async def save_cases_to_db(session: AsyncSession, cases_data: list) -> None:
                 case_data['case_link'],
                 case_data['court'],
                 case_data['judge'],
-                plaintiff.id,
-                respondent.id
+                plaintiff.id if plaintiff else None,
+                respondent.id if respondent else None
             )
 
 
@@ -54,7 +54,7 @@ async def process_organisation(
     
     if not org:
         org = OrganisationDB(inn=inn, name=name)
-        await session.add(org)
+        session.add(org)
         await session.flush()
 
     return org
@@ -76,12 +76,19 @@ async def process_court_case(
     existing_case = result.scalar_one_or_none()
     
     if existing_case:
-        existing_case.date = date or existing_case.date
-        existing_case.case_link = case_link or existing_case.case_link
-        existing_case.court = court or existing_case.court
-        existing_case.judge = judge or existing_case.judge
-        existing_case.plaintiff_id = plaintiff_id or existing_case.plaintiff_id
-        existing_case.respondent_id = respondent_id or existing_case.respondent_id
+        if date is not None:
+            existing_case.date = date
+        if case_link:
+            existing_case.case_link = case_link
+        if court:
+            existing_case.court = court
+        if judge:
+            existing_case.judge = judge
+        if plaintiff_id:
+            existing_case.plaintiff_id = plaintiff_id
+        if respondent_id:
+            existing_case.respondent_id = respondent_id
+        session.add(existing_case)
     else:
         new_case = CourtCaseDB(
             date=date,
@@ -92,6 +99,6 @@ async def process_court_case(
             plaintiff_id=plaintiff_id,
             respondent_id=respondent_id
         )
-        await session.add(new_case)
+        session.add(new_case)
 
     await session.flush()
