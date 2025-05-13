@@ -99,8 +99,9 @@ export default function CasesTablePage() {
     
     <Filter filters={filters} setFilters={setFilters} />
     
-    <div className="flex justify-end">
+    <div className="flex justify-end gap-3">
       <Button onClick={fetchCases}>Применить фильтры</Button>
+      <Button onClick={() => router.push('external/search')}>Внешний поиск</Button>
     </div>
 
       {loading && <p>Загрузка...</p>}

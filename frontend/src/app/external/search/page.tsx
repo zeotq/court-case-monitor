@@ -80,6 +80,7 @@ export default function PostRequestPage() {
         
         {/* Кнопка для отправки POST-запроса */}
         <Button onClick={sendPostRequest}>Send POST Request</Button>
+        <Button onClick={() => router.push('/table')}>Поиск по БД</Button>
       </div>
       <div>
         {/* Блок для отображения ответа */}
