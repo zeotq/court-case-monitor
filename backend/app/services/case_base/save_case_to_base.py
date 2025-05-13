@@ -8,12 +8,22 @@ from app.models.case import CourtCaseDB
 
 
 async def save_cases_to_db(session: AsyncSession, cases_data: list) -> None:
+    case_data: dict
+
     async with session.begin():
         for case_data in cases_data:
-            case_date = datetime.strptime(
-                case_data['date'], 
-                "%d.%m.%Y %H:%M:%S"
-            )
+            case_date_source = case_data.get('date')
+
+            if case_date_source:
+                case_date = datetime.strptime(
+                    case_date_source, 
+                    "%d.%m.%Y %H:%M:%S"
+                )
+            else:
+                case_date = datetime.strptime(
+                    "01.01.1970 00:00:00",
+                    "%d.%m.%Y %H:%M:%S"
+                )
 
             plaintiff = await process_organisation(
                 session,
@@ -30,10 +40,10 @@ async def save_cases_to_db(session: AsyncSession, cases_data: list) -> None:
             await process_court_case(
                 session,
                 case_date,
-                case_data['case_number'],
-                case_data['case_link'],
-                case_data['court'],
-                case_data['judge'],
+                case_data.get('case_number'),
+                case_data.get('case_link'),
+                case_data.get('court'),
+                case_data.get('judge'),
                 plaintiff.id if plaintiff else None,
                 respondent.id if respondent else None
             )

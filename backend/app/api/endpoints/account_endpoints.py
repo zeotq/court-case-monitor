@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from sqlalchemy import select
 
-from app.models.user import CourtsCreate, UserBase
+from app.models.user import CourtsCreate, UserBase, UserDB
 
 
 async def update_user_courts_data(

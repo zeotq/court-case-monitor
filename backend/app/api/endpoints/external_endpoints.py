@@ -58,8 +58,6 @@ async def search_case(
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"httpx.RequestError: {e}")
 
     parsed_response_text = SearchResponseParser.parse(response.text)
-
-    parsed_response_text = SearchResponseParser.parse(response.text)
     await save_cases_to_db(session, parsed_response_text['cases'])
 
     return JSONResponse(content=parsed_response_text, status_code=response.status_code)
