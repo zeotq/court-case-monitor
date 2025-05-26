@@ -1,4 +1,5 @@
 from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from kad_access_cookies import get_cookies_dict
 import asyncio
 import json
@@ -9,7 +10,9 @@ from contextlib import asynccontextmanager
 
 COOKIE_CACHE_FILE = "data/cookies_cache.json"
 MIN_REQUEST_INTERVAL = 60  # seconds
-
+CORS_ORIGINS = [
+    "http://backend:8080",
+]
 
 lock = asyncio.Lock()
 last_request_time = 0
@@ -81,6 +84,13 @@ async def get_cookies_from_file():
         raise HTTPException(404, "Cached cookies not found")
     return cookies
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=CORS_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(router)
 
