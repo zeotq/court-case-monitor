@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, ChangeEvent } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/auth/components/AuthContext";
@@ -31,13 +31,12 @@ export default function CasesTablePage() {
   const [cases, setCases] = useState<CaseData[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [filterNumber, setFilterNumber] = useState<string>("");
   const [filters, setFilters] = useState<Filters>({});
 
   const { accessToken, setAccessToken } = useAuth();
   const router = useRouter();
 
-  const fetchCases = async () => {
+  const fetchCases = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -75,19 +74,19 @@ export default function CasesTablePage() {
 
       const data = await res.json();
       setCases(data.cases || []);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error fetching cases:", err);
-      setError(err.message || "Unknown error");
+      setError((err instanceof Error ? err.message : "Unknown error"));
     } finally {
       setLoading(false);
     }
-  };
+  }, [accessToken, setAccessToken, router, filters]);
 
   useEffect(() => {
     if (accessToken) {
       fetchCases();
     }
-  }, [accessToken]);
+  }, [accessToken, fetchCases]);
   
   return (
     <div className="p-4 space-y-4">

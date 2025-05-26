@@ -54,7 +54,7 @@ export default function PostRequestPage() {
     
           const data = await res.json();
           setResponse(JSON.stringify(data, null, 2));
-        } catch (err: any) {
+        } catch (err) {
           console.error("Error fetching cases:", err);
           setResponse(`Error: ${err}`);
         } finally {
