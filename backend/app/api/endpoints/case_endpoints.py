@@ -2,13 +2,15 @@ from fastapi import HTTPException, status
 from fastapi.responses import JSONResponse
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, or_
 from sqlalchemy.orm import joinedload
 from datetime import datetime
 
 from app.models.arbitr import SearchRequestData
 from app.models.case import CourtCaseDB
 
+from app.services.case_base import get_label
+from app.utils.kad_parser import case_type_to_label
 
 async def search_case_in_db(
     request: SearchRequestData,
@@ -22,8 +24,13 @@ async def search_case_in_db(
 
         filters = []
 
+        if request.CaseType:
+            filters.append(CourtCaseDB.case_type == request.CaseType)
+
         if request.Courts:
-            filters.append(CourtCaseDB.court.in_(request.Courts))
+            filters.append(or_(
+            *[CourtCaseDB.court.ilike(f"%{court}%") for court in request.Courts]
+        ))
 
         if request.Judges:
             filters.append(CourtCaseDB.judge.in_(map(lambda a: a.JudgeId, request.Judges)))
@@ -65,10 +72,11 @@ async def search_case_in_db(
         for case in cases:
             cases_data.append({
                 "id": case.id,
+                "case_type": case_type_to_label(case.case_type),
                 "date": case.date.isoformat(),
                 "case_number": case.case_number,
                 "case_link": case.case_link,
-                "court": case.court,
+                "court": get_label(case.court),
                 "judge": case.judge,
                 "plaintiff": {
                     "name": case.plaintiff.name if case.plaintiff else None,

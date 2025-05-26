@@ -2,9 +2,10 @@ import httpx
 from fastapi import HTTPException, status
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
+from datetime import datetime
 
 from app.models.arbitr import SearchRequestData
-from app.utils.kad_parser import SearchResponseParser
+from app.utils.kad_parser import SearchResponseParser, case_type_to_litter
 from app.services.case_base import save_cases_to_db
 from app.config import settings, ARBITR_URL, COOKIE_URL
 
@@ -35,17 +36,22 @@ async def search_case(
     if not settings.cookies:
         settings.cookies = await fetch_cookies_from_file()
 
+    print(request.DateFrom)
+
     data = {
         "Page": 1 if request.Page is None else request.Page,
         "Count": min(request.Count, 25) if request.Count else 25,
         "Courts": request.Courts or [],
-        "DateFrom": request.DateFrom.isoformat() if request.DateFrom else None,
-        "DateTo": request.DateTo.isoformat() if request.DateTo else None,
+        "DateFrom": datetime.strptime(request.DateFrom, "%Y-%m-%d").replace(hour=0, minute=0, second=0).strftime("%Y-%m-%dT%H:%M:%S") if request.DateFrom else None,
+        "DateTo": datetime.strptime(request.DateTo, "%Y-%m-%d").replace(hour=23, minute=59, second=59).strftime("%Y-%m-%dT%H:%M:%S") if request.DateTo else None,
         "Sides": [side.model_dump() for side in (request.Sides or [])],
         "Judges": [judge.JudgeId for judge in (request.Judges or [])],
         "CaseNumbers": request.CaseNumbers or [],
         "WithVKSInstances": request.WithVKSInstances or False
     }
+
+    if request.CaseType:
+        data.update({"CaseType" : case_type_to_litter(request.CaseType)})
 
     try:
         async with httpx.AsyncClient() as client:

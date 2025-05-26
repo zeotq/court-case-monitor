@@ -15,6 +15,7 @@ class Judge(BaseModel):
 class SearchRequestData(BaseModel):
     Page: Optional[int] = None
     Count: Optional[int] = None
+    CaseType: Optional[str] = None
     Courts: Optional[List[str]] = None
     DateFrom: Optional[str] = None
     DateTo: Optional[str] = None

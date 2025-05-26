@@ -9,9 +9,10 @@ class CourtCaseDB(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     date = Column(DateTime)
+    case_type = Column(String(16))
     case_number = Column(String(50), unique=True)
     case_link = Column(String(512))
-    court = Column(String(255))
+    court = Column(String(64))
     judge = Column(String(64))
 
     plaintiff_id = Column(Integer, ForeignKey('organisations.id'), nullable=True, index=True)
