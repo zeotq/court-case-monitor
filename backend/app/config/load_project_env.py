@@ -9,8 +9,7 @@ DATABASE_DROP_ALL = getenv("DATABASE_DROP_ALL").lower() == "true"
 DATABASE_ECHO = getenv("DATABASE_ECHO").lower() == "true"
 
 ARBITR_URL=getenv("ARBITR_URL")
-FRONTEND_ORIGIN_1 = getenv("FRONTEND_ORIGIN_1")
-FRONTEND_ORIGIN_2 = getenv("FRONTEND_ORIGIN_2")
+FRONTEND_ORIGINS = getenv("FRONTEND_ORIGINS", "").split(",")
 
 SECRET_KEY = getenv("SECRET_KEY")
 ALGORITHM = getenv("ALGORITHM")
