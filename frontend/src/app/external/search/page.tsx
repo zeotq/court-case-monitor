@@ -32,6 +32,7 @@ export default function PostRequestPage() {
               },
               body: JSON.stringify({
                 ...filters,
+                CaseType: filters.CaseType || undefined,
                 CaseNumbers: filters.CaseNumbers || undefined,
                 Courts: filters.Courts || undefined,
                 Judges: filters.Judges?.map(judge => ({ JudgeId: judge })) || undefined,

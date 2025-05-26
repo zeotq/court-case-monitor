@@ -18,6 +18,7 @@ type Party = {
 
 type CaseData = {
   date: string | null;
+  case_type: string | null;
   case_number: string;
   case_link: string;
   judge: string | null;
@@ -52,6 +53,7 @@ export default function CasesTablePage() {
           },
           body: JSON.stringify({
             ...filters,
+            CaseType: filters.CaseType || undefined,
             CaseNumbers: filters.CaseNumbers || undefined,
             Courts: filters.Courts || undefined,
             Judges: filters.Judges?.map(judge => ({ JudgeId: judge })) || undefined,
@@ -114,6 +116,7 @@ export default function CasesTablePage() {
               <tr>
                 <th className="border px-4 py-2">Дата</th>
                 <th className="border px-4 py-2">Номер дела</th>
+                <th className="border px-4 py-2">Тип дела</th>
                 <th className="border px-4 py-2">Истец</th>
                 <th className="border px-4 py-2">Ответчик</th>
                 <th className="border px-4 py-2">Судья</th>
@@ -129,6 +132,7 @@ export default function CasesTablePage() {
                       {c.case_number}
                     </Link>
                   </td>
+                  <td className="border px-4 py-2">{c.case_type ?? '—'}</td>
                   <td className="border px-4 py-2">
                     {c.plaintiff?.name ?? '—'}<br />
                     <small className="text-gray-500">{c.plaintiff?.inn ?? ''}</small>
