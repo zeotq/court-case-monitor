@@ -49,14 +49,14 @@ export default function PostRequestPage() {
           );
           if (!res.ok) {
             const text = await res.text();
-            throw new Error(`Ошибка ${res.status}: ${text}`);
+            throw new Error(`${res.status}: ${text}`);
           }
     
           const data = await res.json();
           setResponse(JSON.stringify(data, null, 2));
         } catch (err) {
           console.error("Error fetching cases:", err);
-          setResponse(`Error: ${err}`);
+          setResponse(`${err}`);
         } finally {
           
         }
