@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, ChangeEvent } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/auth/components/AuthContext";
@@ -18,6 +18,7 @@ type Party = {
 
 type CaseData = {
   date: string | null;
+  case_type: string | null;
   case_number: string;
   case_link: string;
   judge: string | null;
@@ -30,13 +31,12 @@ export default function CasesTablePage() {
   const [cases, setCases] = useState<CaseData[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [filterNumber, setFilterNumber] = useState<string>("");
   const [filters, setFilters] = useState<Filters>({});
 
   const { accessToken, setAccessToken } = useAuth();
   const router = useRouter();
 
-  const fetchCases = async () => {
+  const fetchCases = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -52,6 +52,7 @@ export default function CasesTablePage() {
           },
           body: JSON.stringify({
             ...filters,
+            CaseType: filters.CaseType || undefined,
             CaseNumbers: filters.CaseNumbers || undefined,
             Courts: filters.Courts || undefined,
             Judges: filters.Judges?.map(judge => ({ JudgeId: judge })) || undefined,
@@ -73,19 +74,19 @@ export default function CasesTablePage() {
 
       const data = await res.json();
       setCases(data.cases || []);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error fetching cases:", err);
-      setError(err.message || "Unknown error");
+      setError((err instanceof Error ? err.message : "Unknown error"));
     } finally {
       setLoading(false);
     }
-  };
+  }, [accessToken, setAccessToken, router, filters]);
 
   useEffect(() => {
     if (accessToken) {
       fetchCases();
     }
-  }, [accessToken]);
+  }, [accessToken, fetchCases]);
   
   return (
     <div className="p-4 space-y-4">
@@ -99,8 +100,9 @@ export default function CasesTablePage() {
     
     <Filter filters={filters} setFilters={setFilters} />
     
-    <div className="flex justify-end">
+    <div className="flex justify-end gap-3">
       <Button onClick={fetchCases}>Применить фильтры</Button>
+      <Button onClick={() => router.push('external/search')}>Внешний поиск</Button>
     </div>
 
       {loading && <p>Загрузка...</p>}
@@ -113,6 +115,7 @@ export default function CasesTablePage() {
               <tr>
                 <th className="border px-4 py-2">Дата</th>
                 <th className="border px-4 py-2">Номер дела</th>
+                <th className="border px-4 py-2">Тип дела</th>
                 <th className="border px-4 py-2">Истец</th>
                 <th className="border px-4 py-2">Ответчик</th>
                 <th className="border px-4 py-2">Судья</th>
@@ -128,6 +131,7 @@ export default function CasesTablePage() {
                       {c.case_number}
                     </Link>
                   </td>
+                  <td className="border px-4 py-2">{c.case_type ?? '—'}</td>
                   <td className="border px-4 py-2">
                     {c.plaintiff?.name ?? '—'}<br />
                     <small className="text-gray-500">{c.plaintiff?.inn ?? ''}</small>

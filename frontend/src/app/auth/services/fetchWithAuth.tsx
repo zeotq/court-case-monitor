@@ -24,9 +24,9 @@ export const fetchWithAuth = async (
       headers.set("Authorization", `Bearer ${refreshData.access_token}`);
       response = await fetch(url, { ...options, headers });
     } else {
-      const redirectUri = encodeURIComponent(window.location.href);
+      const callbackUri = encodeURIComponent(window.location.href);
       auth.setAccessToken(null);
-      push(`/auth?redirect_uri=${redirectUri}`);
+      push(`/auth?callback_uri=${callbackUri}`);
     }
   }
 

@@ -24,6 +24,8 @@ class SearchResponseParser:
                 date_div = num_td.find("div", {"title": True})
                 if date_div:
                     case_data["date"] = SearchResponseParser.clean_text(date_div.get("title", ""))
+                    type_class = date_div.get("class", [])
+                    case_data["case_type"] = type_class[0] if type_class and len(type_class) > 0 else 'default'
 
                 case_link = num_td.find("a", class_="num_case")
                 if case_link:
@@ -105,3 +107,27 @@ class SearchResponseParser:
                 pagination_info[key] = None
 
         return {"cases": cases, "pagination": pagination_info}
+    
+
+def case_type_to_label(case_type):
+    """Преобразует тип дела в человекочитаемую метку."""
+    case_type_labels = {
+        "default": "Общее дело",
+        "civil": "Гражданское дело",
+        "administrative": "Административное дело",
+        "arbitration": "Арбитражное дело",
+        "bankruptcy": "Банкртное дело",
+    }
+    return case_type_labels.get(case_type, "Неизвестный тип дела")
+
+
+def case_type_to_litter(case_type):
+    """Преобразует тип дела в первую букву."""
+    case_type_litters = {
+        "default": "N",
+        "civil": "G",
+        "administrative": "А",
+        "arbitration": "S",
+        "bankruptcy": "B",
+    }
+    return case_type_litters.get(case_type, "N")

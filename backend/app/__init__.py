@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.routers import account_router, auth_router, external_router, case_router
-from app.config import FRONTEND_ORIGIN_1, FRONTEND_ORIGIN_2
+from app.config import FRONTEND_ORIGINS
 from app.database import init_db
 
 from app.models.case import CourtCaseDB
@@ -19,14 +19,9 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-origins = [
-    FRONTEND_ORIGIN_1,
-    FRONTEND_ORIGIN_2
-]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=FRONTEND_ORIGINS,
     allow_credentials=True,
     allow_methods=["GET", "POST"],
     allow_headers=["Content-Type", "Authorization"],

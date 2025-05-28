@@ -13,6 +13,7 @@ class Party(BaseModel):
 
 class CourtCase(BaseModel):
     date: datetime
+    case_type: Optional[str]
     case_number: str
     case_link: Optional[str]
     court: Optional[str]

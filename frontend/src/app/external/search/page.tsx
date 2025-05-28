@@ -32,6 +32,7 @@ export default function PostRequestPage() {
               },
               body: JSON.stringify({
                 ...filters,
+                CaseType: filters.CaseType || undefined,
                 CaseNumbers: filters.CaseNumbers || undefined,
                 Courts: filters.Courts || undefined,
                 Judges: filters.Judges?.map(judge => ({ JudgeId: judge })) || undefined,
@@ -53,7 +54,7 @@ export default function PostRequestPage() {
     
           const data = await res.json();
           setResponse(JSON.stringify(data, null, 2));
-        } catch (err: any) {
+        } catch (err) {
           console.error("Error fetching cases:", err);
           setResponse(`Error: ${err}`);
         } finally {
@@ -80,6 +81,7 @@ export default function PostRequestPage() {
         
         {/* Кнопка для отправки POST-запроса */}
         <Button onClick={sendPostRequest}>Send POST Request</Button>
+        <Button onClick={() => router.push('/table')}>Поиск по БД</Button>
       </div>
       <div>
         {/* Блок для отображения ответа */}

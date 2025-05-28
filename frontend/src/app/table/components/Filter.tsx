@@ -3,6 +3,8 @@
 import { ChangeEvent } from 'react';
 import { Input } from "@/app/table/components/Input";
 import { Button } from "@/components/Button";
+import { COURT_OPTIONS } from "@/app/constants/courtOptions";
+import { MultiSelect } from './MultiSelect';
 
 interface Side {
     Name?: string;
@@ -11,6 +13,7 @@ interface Side {
   }
 
 export interface Filters {
+  CaseType?: string;
   Courts?: string[];
   DateFrom?: string;
   DateTo?: string;
@@ -18,6 +21,7 @@ export interface Filters {
   Judges?: string[];
   CaseNumbers?: string[];
   WithVKSInstances?: boolean;
+  Page?: number;
 }
 
 export default function Filter({
@@ -105,13 +109,16 @@ export default function Filter({
         </div>
 
         {/* Суды */}
-        <div className="space-y-2">
-          <label className="block text-sm font-medium">Суды (через запятую)</label>
-          <Input
-            value={Array.isArray(filters.Courts) ? filters.Courts.join(', ') : filters.Courts || ''}
-            onChange={e => handleArrayChange(e, 'Courts')}
-            onBlur={() => handleArrayBlur('Courts')}
-          />
+        <div className=''>
+          <div className="space-y-2">
+            <label className="block text-sm font-medium">Суды</label>
+            <MultiSelect
+              value={filters.Courts || []}
+              onChange={(courts) => setFilters({ ...filters, Courts: courts })}
+              options={COURT_OPTIONS}
+              placeholder="Выберите суд..."
+            />
+          </div>
         </div>
 
         {/* Судьи */}
@@ -124,15 +131,42 @@ export default function Filter({
           />
         </div>
 
+        {/* Тип дела */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium">Тип дела</label>
+          <select
+            name="caseType"
+            value={filters.CaseType}
+            onChange={e => setFilters({ ...filters, CaseType: e.target.value })}
+            className="border rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="" className='text-foreground bg-background'>Не выбрано</option>
+            <option value="administrative" className='text-foreground bg-background'>Административные</option>
+            <option value="civil" className='text-foreground bg-background'>Гражданские</option>
+            <option value="bankruptcy" className='text-foreground bg-background'>Банкротные</option>
+          </select>
+        </div>
+
         {/* ВКС */}
-        <div className="flex items-center gap-2">
+        <div className="space-y-2">
+          <label className="block text-sm font-medium">С участием ВКС</label>
           <input
             type="checkbox"
             checked={filters.WithVKSInstances || false}
             onChange={e => setFilters({ ...filters, WithVKSInstances: e.target.checked })}
-            className="h-4 w-4"
+            className="border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-          <label className="text-sm font-medium">С участием ВКС</label>
+        </div>
+
+        {/* Пагинация */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium">Старница</label>
+          <input 
+            type="number"
+            min='1'
+            value={filters.Page || ''}
+            onChange={e => setFilters({ ...filters, Page: parseInt(e.target.value) || 1 })}
+            className='border rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500'></input>
         </div>
       </div>
 

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useAuth } from "@/app/auth/components/AuthContext";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -14,7 +13,6 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ toggle }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const { setAccessToken } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

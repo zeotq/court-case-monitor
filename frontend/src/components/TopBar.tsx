@@ -1,16 +1,14 @@
 "use client";
 
-import React, { HTMLAttributes, PropsWithChildren } from "react";
+import React, { HTMLAttributes } from "react";
 import { useAuth } from "@/app/auth/components/AuthContext";
 import { logout } from "@/app/services/logout";
 import AuthButton from "@/components/AuthButton";
 import { Button } from "@/components/Button";
 
 
-interface TopBarProps extends HTMLAttributes<HTMLDivElement> {}
-
-const TopBar: React.FC<PropsWithChildren<TopBarProps>> = ({ children, className = "", ...props }) => {
-  const { isAuthenticated, setAccessToken, accessToken } = useAuth();
+const TopBar: React.FC<HTMLAttributes<HTMLDivElement>> = ({ children }) => {
+  const { isAuthenticated, setAccessToken } = useAuth();
 
   return (
     <div className="w-full flex justify-end items-center p-4 bg-background shadow-md border-2 border-b-5 border-foreground rounded-lg">
