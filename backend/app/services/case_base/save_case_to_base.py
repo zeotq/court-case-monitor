@@ -2,53 +2,50 @@ from datetime import datetime
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from pydantic import ValidationError
 
 from app.models.organisation import OrganisationDB
 from app.models.case import CourtCaseDB
+from app.models.case import CourtCase
 
 from .courts_mapping import get_service_name
 
 
-async def save_cases_to_db(session: AsyncSession, cases_data: list) -> None:
+async def save_cases_to_db(session: AsyncSession, cases_data: list[dict]) -> None:
     case_data: dict
 
     async with session.begin():
         for case_data in cases_data:
-            case_date_source = case_data.get('date')
+            try:
+                validated_case = CourtCase(**case_data)
+            except ValidationError as e:
+                print("Case skipped due to validation error:", e)
+                continue
 
-            if case_date_source:
-                case_date = datetime.strptime(
-                    case_date_source, 
-                    "%d.%m.%Y %H:%M:%S"
-                )
-            else:
-                case_date = datetime.strptime(
-                    "01.01.1970 00:00:00",
-                    "%d.%m.%Y %H:%M:%S"
-                )
+            case_date = validated_case.date
 
             plaintiff = await process_organisation(
                 session,
-                case_data['plaintiff']['inn'],
-                case_data['plaintiff']['name']
+                validated_case.plaintiff.inn if validated_case.plaintiff else None,
+                validated_case.plaintiff.name if validated_case.plaintiff else None,
             )
             
             respondent = await process_organisation(
                 session,
-                case_data['respondent']['inn'],
-                case_data['respondent']['name']
+                validated_case.respondent.inn if validated_case.respondent else None,
+                validated_case.respondent.name if validated_case.respondent else None,
             )
 
             await process_court_case(
                 session,
                 case_date,
-                case_data.get('case_type'),
-                case_data.get('case_number'),
-                case_data.get('case_link'),
-                case_data.get('court'),
-                case_data.get('judge'),
+                validated_case.case_type,
+                validated_case.case_number,
+                validated_case.case_link,
+                validated_case.court,
+                validated_case.judge,
                 plaintiff.id if plaintiff else None,
-                respondent.id if respondent else None
+                respondent.id if respondent else None,
             )
 
 

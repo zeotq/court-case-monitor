@@ -75,7 +75,7 @@ frontend/.env.dev
 frontend/.env.prod
 ```
 
-**Пример содержимого `frontend/.env.dev`:**
+**Пример содержимого `frontend/.env.dev` (для локального запуска без Docker использовать - `.env.local`):**
 
 ```dotenv
 NEXT_PUBLIC_API_URL=http://localhost:8080
