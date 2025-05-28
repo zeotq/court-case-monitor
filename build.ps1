@@ -3,7 +3,7 @@ $MODE = $args[0]
 
 if ($MODE -ne "dev" -and $MODE -ne "prod") {
     Write-Host "Invalid mode. Use: dev or prod"
-    Write-Host "Example: .\manage.ps1 dev"
+    Write-Host "Example: .\build.ps1 dev"
     exit 1
 }
 

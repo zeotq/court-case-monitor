@@ -18,7 +18,7 @@ services:
     build:
       dockerfile: Dockerfile.dev
     env_file:
-      - ./frontend/.env.local
+      - ./frontend/.env.dev
     environment:
       - NODE_ENV=development
       - WATCHPACK_POLLING=true

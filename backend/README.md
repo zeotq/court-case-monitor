@@ -5,9 +5,7 @@
 
 ## How to run?
 
-### 1. Create configuration files  
-Follow the instructions in [`app/config/README.md`](/backend/app/config/README.md) to create all necessary configuration files.  
-### 2. Create and activate virtual environment  
+### 1. Create and activate virtual environment  
 Create a virtual environment in the `/backend` directory:  
 ```bash
 python -m venv venv
@@ -22,15 +20,15 @@ Windows:
 ```bash
 .\venv\Scripts\activate
 ```
-### 3. Install dependencies
+### 2. Install dependencies
 Install all dependencies listed in requirements.txt:
 ```bash
 pip install -r requirements.txt
 ```
-### 4. Start the server
+### 3. Start the server
 Run the following command to start the FastAPI server:
 ```bash
-uvicorn app:app --host 0.0.0.0 --port 8000 --reload
+uvicorn app:app --host 0.0.0.0 --port 8080 --reload
 ```
 Alternatively, you can run main.py directly:
 ```
@@ -42,10 +40,7 @@ python main.py
 
 ## Как запустить?  
 
-### 1. Создайте конфигурационные файлы  
-Следуйте инструкциям в [`app/config/README.md`](/backend/app/config/README.md) для создания всех необходимых конфигурационных файлов.  
-
-### 2. Создайте и активируйте виртуальное окружение  
+### 1. Создайте и активируйте виртуальное окружение  
 Создайте виртуальное окружение в директории `/backend`:  
 ```bash
 python -m venv venv
@@ -61,16 +56,16 @@ source venv/bin/activate
 .\venv\Scripts\activate
 ```
 
-### 3. Установите зависимости  
+### 2. Установите зависимости  
 Установите все зависимости, указанные в [`requirements.txt`](/backend/requirements.txt):  
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Запустите сервер  
+### 3. Запустите сервер  
 Запустите сервер FastAPI с помощью команды:  
 ```bash
-uvicorn app:app --host 0.0.0.0 --port 8000 --reload
+uvicorn app:app --host 0.0.0.0 --port 8080 --reload
 ```
 Или запустите файл [`main.py`](/backend/main.py) напрямую:  
 ```bash
