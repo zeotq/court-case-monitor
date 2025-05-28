@@ -5,7 +5,7 @@ services:
 
   frontend:
     env_file:
-      - ./frontend/.env.production
+      - ./frontend/.env.prod
 
   db:
     env_file:
