@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Node
+node_modules/
+dist/
+.next
+
+# Git
+.git/
+.gitignore
+
+# OS/system
+.DS_Store
+Thumbs.db
+.env

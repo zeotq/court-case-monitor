@@ -1,0 +1,31 @@
+services:
+  cookie:
+    build:
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./cookie-fetcher:/app
+      - ./cookie-fetcher/data:/app/data
+
+  backend:
+    build:
+      dockerfile: Dockerfile.dev
+    env_file:
+      - ./backend/.env.dev
+    volumes:
+      - ./backend:/app
+
+  frontend:
+    build:
+      dockerfile: Dockerfile.dev
+    env_file:
+      - ./frontend/.env.dev
+    environment:
+      - NODE_ENV=development
+      - WATCHPACK_POLLING=true
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+  db:
+    env_file:
+      - ./.env.db
