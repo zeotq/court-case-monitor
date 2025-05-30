@@ -94,8 +94,7 @@ NEXT_PUBLIC_API_URL=https://api.my-production-site.com
 **Расположение файлов:**
 
 ```
-database/.env.dev  
-database/.env.prod
+.env.db (корневая папка проекта)
 ```
 
 **Пример содержимого `.env.db`:**
