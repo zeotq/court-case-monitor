@@ -11,7 +11,7 @@ from app.config import settings, ARBITR_URL, COOKIE_URL
 
 
 async def fetch_cookies(from_file: bool = False):
-    TARGET_URL = f"{COOKIE_URL}/cookies/file" if from_file else f"{COOKIE_URL}/cookies?headless=false&debug=false"
+    TARGET_URL = f"{COOKIE_URL}/cookies?from_file={'true' if from_file else 'false'}"
     try:
         async with httpx.AsyncClient() as client:
             r = await client.get(TARGET_URL, timeout=60)
@@ -51,19 +51,25 @@ async def search_case(
     if request.CaseType:
         data.update({"CaseType" : case_type_to_litter(request.CaseType)})
 
-    try:
-        async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient() as client:
+        try:
             response = await client.post(SEARCH_URL, headers=settings.headers, cookies=settings.cookies, json=data)
             response.raise_for_status()
-    except httpx.HTTPStatusError as e:
-        if e.response.status_code == status.HTTP_451_UNAVAILABLE_FOR_LEGAL_REASONS:
-            settings.cookies = await fetch_cookies()
-            response = await client.post(SEARCH_URL, headers=settings.headers, cookies=settings.cookies, json=data)
-            response.raise_for_status()
-        else:
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Try again later. {SEARCH_URL} return code {e.response.status_code} with error {e.response.text}")
-    except httpx.RequestError as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"RequestError: {e}")
+        except httpx.HTTPStatusError as e:
+            if e.response.status_code == status.HTTP_451_UNAVAILABLE_FOR_LEGAL_REASONS:
+                settings.cookies = await fetch_cookies()
+                response = await client.post(SEARCH_URL, headers=settings.headers, cookies=settings.cookies, json=data)
+                response.raise_for_status()
+            else:
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail=f"Try again later. {SEARCH_URL} return code {e.response.status_code} with error {e.response.text}"
+                )
+        except httpx.RequestError as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
+                detail=f"RequestError: {e}"
+            )
 
     parsed_response_text = SearchResponseParser.parse(response.text)
     await save_cases_to_db(session, parsed_response_text['cases'])

@@ -3,7 +3,6 @@ services:
     build:
       context: ./cookie-fetcher
       dockerfile: Dockerfile
-    ports: ["8041:8041"]
     shm_size: '1gb'
     restart: unless-stopped
 
@@ -12,7 +11,6 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    ports: ["8080:8080"]
     depends_on:
       - db
     restart: unless-stopped
@@ -21,7 +19,6 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    ports: ["80:3000", "443:3000", "3000:3000"]
     depends_on:
       - backend
     restart: unless-stopped
@@ -29,9 +26,21 @@ services:
   db:
     image: postgres:16
     restart: unless-stopped
-    ports: ["5432:5432"]
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - frontend
+      - backend
+      - cookie
+    restart: unless-stopped
 
 volumes:
   postgres_data:
