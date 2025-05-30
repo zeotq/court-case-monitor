@@ -45,7 +45,10 @@ router = APIRouter()
 
 
 @router.get("/cookies", tags=["Cookies"])
-async def get_cookies(headless: bool = False, debug: bool = False):
+async def get_cookies(headless: bool = False, debug: bool = False, from_file: bool = False):
+    if from_file:
+        return await get_cookies_from_file()
+
     global last_request_time, cached_cookies
 
     async with lock:
