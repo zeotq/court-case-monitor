@@ -75,7 +75,7 @@ frontend/.env.dev
 frontend/.env.prod
 ```
 
-**Пример содержимого `frontend/.env.dev`:**
+**Пример содержимого `frontend/.env.dev` (для локального запуска без Docker использовать - `.env.local`):**
 
 ```dotenv
 NEXT_PUBLIC_API_URL=http://localhost:8080
@@ -94,8 +94,7 @@ NEXT_PUBLIC_API_URL=https://api.my-production-site.com
 **Расположение файлов:**
 
 ```
-database/.env.dev  
-database/.env.prod
+.env.db (корневая папка проекта)
 ```
 
 **Пример содержимого `.env.db`:**

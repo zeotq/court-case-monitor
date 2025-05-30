@@ -116,7 +116,7 @@ def case_type_to_label(case_type):
         "civil": "Гражданское дело",
         "administrative": "Административное дело",
         "arbitration": "Арбитражное дело",
-        "bankruptcy": "Банкртное дело",
+        "bankruptcy": "Банкротное дело",
     }
     return case_type_labels.get(case_type, "Неизвестный тип дела")
 

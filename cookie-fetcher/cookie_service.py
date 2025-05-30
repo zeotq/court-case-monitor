@@ -81,7 +81,7 @@ async def get_cookies(headless: bool = False, debug: bool = False):
 async def get_cookies_from_file():
     cookies = await load_cached_cookies_from_file()
     if cookies is None:
-        raise HTTPException(404, "Cached cookies not found")
+        cookies = await get_cookies(headless=False, debug=False)
     return cookies
 
 app.add_middleware(

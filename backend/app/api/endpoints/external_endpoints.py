@@ -10,18 +10,17 @@ from app.services.case_base import save_cases_to_db
 from app.config import settings, ARBITR_URL, COOKIE_URL
 
 
-async def fetch_cookies_from_file():
-    async with httpx.AsyncClient() as client:
-        r = await client.get(f"{COOKIE_URL}/cookies/file", timeout=60)
-        r.raise_for_status()
-        return r.json()
-
-
-async def fetch_cookies():
-    async with httpx.AsyncClient() as client:
-        r = await client.get(f"{COOKIE_URL}/cookies?headless=false&debug=false", timeout=60)
-        r.raise_for_status()
-        return r.json()
+async def fetch_cookies(from_file: bool = False):
+    TARGET_URL = f"{COOKIE_URL}/cookies/file" if from_file else f"{COOKIE_URL}/cookies?headless=false&debug=false"
+    try:
+        async with httpx.AsyncClient() as client:
+            r = await client.get(TARGET_URL, timeout=60)
+            r.raise_for_status()
+            return r.json()
+    except httpx.HTTPStatusError as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Cookie service return status code {e.response.status_code} with error {e.response.text}")
+    except httpx.RequestError as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Can't connect to cookie service")
 
 
 async def need_captcha():
@@ -33,10 +32,9 @@ async def search_case(
         session: AsyncSession
     ):
     SEARCH_URL = f"{ARBITR_URL}/Kad/SearchInstances"
-    if not settings.cookies:
-        settings.cookies = await fetch_cookies_from_file()
 
-    print(request.DateFrom)
+    if not settings.cookies:
+        settings.cookies = await fetch_cookies(from_file=True)
 
     data = {
         "Page": 1 if request.Page is None else request.Page,
@@ -58,10 +56,14 @@ async def search_case(
             response = await client.post(SEARCH_URL, headers=settings.headers, cookies=settings.cookies, json=data)
             response.raise_for_status()
     except httpx.HTTPStatusError as e:
-        settings.cookies = await fetch_cookies()
-        raise HTTPException(status_code=response.status_code, detail=f"Try again later. {e}")
+        if e.response.status_code == status.HTTP_451_UNAVAILABLE_FOR_LEGAL_REASONS:
+            settings.cookies = await fetch_cookies()
+            response = await client.post(SEARCH_URL, headers=settings.headers, cookies=settings.cookies, json=data)
+            response.raise_for_status()
+        else:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Try again later. {SEARCH_URL} return code {e.response.status_code} with error {e.response.text}")
     except httpx.RequestError as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"httpx.RequestError: {e}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"RequestError: {e}")
 
     parsed_response_text = SearchResponseParser.parse(response.text)
     await save_cases_to_db(session, parsed_response_text['cases'])

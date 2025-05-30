@@ -36,13 +36,13 @@ export default function CasesTablePage() {
   const { accessToken, setAccessToken } = useAuth();
   const router = useRouter();
 
-  const fetchCases = useCallback(async () => {
+  const fetchCases = useCallback(async (address: string) => {
     setLoading(true);
     setError(null);
 
     try {
       const res = await fetchWithAuth(
-        `${API_URL}/case/search`,
+        address,
         { accessToken, setAccessToken },
         router.push,
         {
@@ -84,7 +84,7 @@ export default function CasesTablePage() {
 
   useEffect(() => {
     if (accessToken) {
-      fetchCases();
+      fetchCases(`${API_URL}/case/search`);
     }
   }, [accessToken, fetchCases]);
   
@@ -101,8 +101,9 @@ export default function CasesTablePage() {
     <Filter filters={filters} setFilters={setFilters} />
     
     <div className="flex justify-end gap-3">
-      <Button onClick={fetchCases}>Применить фильтры</Button>
-      <Button onClick={() => router.push('external/search')}>Внешний поиск</Button>
+      <Button onClick={() => fetchCases(`${API_URL}/case/search`)}>Внутренний поиск (БД)</Button>
+      <Button onClick={() => fetchCases(`${API_URL}/external/search`)}>Внешний поиск (Target)</Button>
+      <Button onClick={() => router.push('external/search')}>JSON представление</Button>
     </div>
 
       {loading && <p>Загрузка...</p>}
