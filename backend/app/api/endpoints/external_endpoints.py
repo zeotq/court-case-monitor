@@ -11,7 +11,7 @@ from app.config import settings, ARBITR_URL, COOKIE_URL
 
 
 async def fetch_cookies(from_file: bool = False):
-    TARGET_URL = f"{COOKIE_URL}/cookies/file" if from_file else f"{COOKIE_URL}/cookies?headless=false&debug=false"
+    TARGET_URL = f"{COOKIE_URL}/cookies?from_file={'true' if from_file else 'false'}"
     try:
         async with httpx.AsyncClient() as client:
             r = await client.get(TARGET_URL, timeout=60)
